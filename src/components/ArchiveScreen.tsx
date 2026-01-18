@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Lock, Globe, Calendar } from 'lucide-react';
+import Image from 'next/image';
 
 interface ArchiveEntry {
   id: string;
@@ -87,14 +88,14 @@ export function ArchiveScreen() {
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-8 lg:pb-16">
-      {/* Header */}
+      {/* ヘッダー */}
       <div className="px-6 pt-12 pb-6 lg:px-16 lg:pt-16 lg:pb-8">
-        <div className="lg:max-w-7xl lg:mx-auto">
+        <div className="lg:max-w-7xl lg:mx-auto"> 
           <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">Archive</h1>
         </div>
       </div>
 
-      {/* Weather Filter */}
+      {/* フィルター */}
       <div className="px-6 pb-8 lg:px-16 lg:pb-12">
         <div className="lg:max-w-7xl lg:mx-auto">
           <button
@@ -111,7 +112,7 @@ export function ArchiveScreen() {
             <Calendar className="w-4 h-4 lg:w-5 lg:h-5" strokeWidth={1.5} />
             <span>Same Temperature as Today ({currentTemp}°C)</span>
           </button>
-
+          {/* 該当なし */}
           {filterActive && filteredEntries.length === 0 && (
             <p className="mt-3 text-[11px] text-[#9B9890] tracking-wide">
               No entries match this temperature
@@ -120,7 +121,7 @@ export function ArchiveScreen() {
         </div>
       </div>
 
-      {/* Entries - Mobile: List, Desktop: Grid */}
+      {/* 出力投稿　モバイル；リスト、デスクトップ：グリッド */}
       <div className="space-y-1 lg:space-y-0 lg:px-16">
         <div className="lg:max-w-7xl lg:mx-auto lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
           {filteredEntries.map((entry) => (
@@ -132,18 +133,25 @@ export function ArchiveScreen() {
               }}
             >
               <div className="flex gap-4 lg:flex-col lg:gap-5">
-                {/* Thumbnail - Desktop: Full width */}
-                <div className="w-20 h-20 flex-shrink-0 bg-[#F5F4F0] rounded-sm overflow-hidden lg:w-full lg:h-48 lg:aspect-[4/3]">
-                  <img
+                {/* サムネイル - デスクトップ：フル幅 */}
+                <div className="relative w-20 h-20 flex-shrink-0 bg-[#F5F4F0] rounded-sm overflow-hidden lg:w-full lg:h-48 lg:aspect-[4/3]">
+                  {/* <img
                     src={entry.image}
                     alt="Entry thumbnail"
                     className="w-full h-full object-cover transition-transform lg:group-hover:scale-105"
-                  />
+                  /> */}
+                <Image
+                    src={entry.image}
+                    alt="Entry thumbnail"
+                    fill
+                    sizes="(max-width: 1024px) 80px, (max-width: 1280px) 50vw, 33vw"
+                    className="object-cover transition-transform lg:group-hover:scale-105"
+                  />          
                 </div>
 
-                {/* Content */}
+                {/* コンテンツ */}
                 <div className="flex-1 flex flex-col justify-between min-w-0 lg:gap-4">
-                  {/* Text Preview */}
+                  {/* テキストプレビュー */}
                   <p
                     className="text-[14px] lg:text-[15px] leading-[1.6] lg:leading-[1.8] text-[#3D3D3A] tracking-wide truncate lg:line-clamp-2"
                     style={{ fontWeight: 400 }}
@@ -151,7 +159,7 @@ export function ArchiveScreen() {
                     {entry.text}
                   </p>
 
-                  {/* Metadata */}
+                  {/* メタデータ */}
                   <div className="flex items-center justify-between mt-3 lg:mt-0">
                     <div className="flex items-center gap-3 text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide">
                       <span>{entry.date}</span>
