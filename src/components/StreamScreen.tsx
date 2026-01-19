@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 
-interface DiaryEntry {
+interface PostEntry {
   id: string;
   image: string;
   text: string;
@@ -13,7 +14,7 @@ interface DiaryEntry {
   isPublic: boolean;
 }
 
-const mockEntries: DiaryEntry[] = [
+const mockEntries: PostEntry[] = [
   {
     id: '1',
     image: 'https://images.unsplash.com/photo-1766932102092-2799e86d0030?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwemVuJTIwbmF0dXJlfGVufDF8fHx8MTc2ODE5NzEwMHww&ixlib=rb-4.1.0&q=80&w=1080',
@@ -46,7 +47,7 @@ const mockEntries: DiaryEntry[] = [
 export function StreamScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
-
+  // モックからの抽出
   const currentEntry = mockEntries[currentIndex];
 
   const handleNext = () => {
@@ -87,11 +88,16 @@ export function StreamScreen() {
       <div className="flex-1 px-6 pb-8 flex flex-col gap-8 lg:px-16 lg:pb-16">
         <div className="lg:max-w-4xl lg:mx-auto w-full">
           {/* Image */}
-          <div className="w-full aspect-[4/5] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
-            <img
+          <div className="relative w-full aspect-[4/5] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
+            <Image
               src={currentEntry.image}
               alt="Memory"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              // ブラウザに適切な画像サイズを選択させるための設定
+              sizes="(max-width: 1024px) 100vw, 80vw"
+              // 画面の主役となる画像なので、優先的に読み込む設定
+              priority
             />
           </div>
 
