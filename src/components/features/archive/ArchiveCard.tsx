@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Lock, Globe } from 'lucide-react';
+import { TagList } from '@/components/ui/tagList';
 
 // プロパティの型定義
 interface ArchiveEntry {
@@ -61,18 +62,7 @@ export function ArchiveCard({ entry }: ArchiveCardProps) {
           </div>
 
           {/* タグ */}
-          {entry.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-3 lg:gap-2">
-              {entry.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="text-[10px] lg:text-[11px] text-[#A8A89E] tracking-wider"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
+              <TagList tags={entry.tags}/>    
         </div>
       </div>
     </div>
