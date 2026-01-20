@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { Bookmark, ArrowLeft, Lock, Globe } from 'lucide-react';
 import { mockEntries } from '@/app/data/mockEntries';
@@ -17,18 +19,7 @@ export function BookmarksScreen({ onBack, onEntryClick }: BookmarkListProps) {
       {/* Back Button */}
       <div className="px-6 pt-12 pb-6 lg:px-16 lg:pt-16 lg:pb-8">
         <div className="lg:max-w-7xl lg:mx-auto">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-[#3D3D3A] hover:text-[#9B9890] transition-colors mb-6"
-            aria-label="Back"
-          >
-            <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
-            <span className="text-[11px] tracking-[0.15em] uppercase" style={{ fontWeight: 400 }}>
-              Back
-            </span>
-          </button>
-
-          {/* Header */}
+          {/* ヘッダー */}
           <div className="flex items-center gap-3 mb-2">
             <Bookmark className="w-5 h-5 text-[#9B9890]" strokeWidth={1.5} />
             <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">

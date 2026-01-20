@@ -3,51 +3,12 @@
 import { useState } from 'react';
 import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
-
-interface PostEntry {
-  id: string;
-  image: string;
-  text: string;
-  date: string;
-  weather: string;
-  tags: string[];
-  isPublic: boolean;
-}
-
-const mockEntries: PostEntry[] = [
-  {
-    id: '1',
-    image: 'https://images.unsplash.com/photo-1766932102092-2799e86d0030?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwemVuJTIwbmF0dXJlfGVufDF8fHx8MTc2ODE5NzEwMHww&ixlib=rb-4.1.0&q=80&w=1080',
-    text: 'The morning light filtered through the curtains, soft and unhurried. I sat with my tea and let the silence fill me. There is a particular kind of peace in doing nothing at all.',
-    date: 'January 11, 2026',
-    weather: '10°C / Rain',
-    tags: ['calm', 'reflective'],
-    isPublic: true,
-  },
-  {
-    id: '2',
-    image: 'https://images.unsplash.com/photo-1560996025-95b43d543770?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYWxtJTIwbW9ybmluZyUyMGxpZ2h0fGVufDF8fHx8MTc2ODE5NzEwMXww&ixlib=rb-4.1.0&q=80&w=1080',
-    text: 'Today I walked without a destination. The city felt different when I wasn\'t rushing through it. I noticed the small café I\'d passed a hundred times, the way the trees bent toward each other over the street.',
-    date: 'January 9, 2026',
-    weather: '14°C / Clear',
-    tags: ['wandering', 'present'],
-    isPublic: false,
-  },
-  {
-    id: '3',
-    image: 'https://images.unsplash.com/photo-1710685375110-3b1f3bf8bb1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cmFucXVpbCUyMHdhdGVyJTIwcmVmbGVjdGlvbnxlbnwxfHx8fDE3NjgxOTcxMDF8MA&ixlib=rb-4.1.0&q=80&w=1080',
-    text: 'The water was still this evening. I sat at the edge and watched my reflection ripple with each breath of wind. Sometimes I feel most myself when I\'m alone with nature.',
-    date: 'January 7, 2026',
-    weather: '8°C / Cloudy',
-    tags: ['solitude', 'nature'],
-    isPublic: true,
-  },
-];
+import { mockEntries } from '@/app/data/mockEntries';
 
 export function StreamScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
-  // モックからの抽出
+  // モック
   const currentEntry = mockEntries[currentIndex];
 
   const handleNext = () => {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PenLine, Waves, Archive } from "lucide-react";
+import { PenLine, Waves, Archive, BookmarkIcon } from "lucide-react";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -20,49 +20,50 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {/* ボトムナビゲーション（モバイル用） */}
             <nav className="border-t border-[#D4CFC3]/10 bg-[#FAFAF8]/95 backdrop-blur-sm lg:hidden fixed bottom-0 w-full max-w-[430px] z-50">
                 <div className="flex items-center justify-around px-6 py-4">
+                    {/* コンポーズ */}
                     <Link
                         href="/compose"
                         className={`
-              flex flex-col items-center gap-1.5 transition-colors
-              ${isActive('/compose')
+                            flex flex-col items-center gap-1.5 transition-colors
+                            ${isActive('/compose')
                                 ? 'text-[#3D3D3A]'
                                 : 'text-[#A8A89E]'
                             }
-            `}
-                        aria-label="Compose"
+                            `}
+                            aria-label="Compose"
                     >
                         <PenLine className="w-5 h-5" strokeWidth={1.5} />
                         <span className="text-[10px] tracking-wider" style={{ fontWeight: 400 }}>
                             Compose
                         </span>
                     </Link>
-
+                    {/* ストリーム */}
                     <Link
                         href="/stream"
                         className={`
-              flex flex-col items-center gap-1.5 transition-colors
-              ${isActive('/stream') || pathname === '/'
-                                ? 'text-[#3D3D3A]'
-                                : 'text-[#A8A89E]'
-                            }
-            `}
-                        aria-label="Stream"
+                            flex flex-col items-center gap-1.5 transition-colors
+                            ${isActive('/stream') || pathname === '/'
+                                                ? 'text-[#3D3D3A]'
+                                                : 'text-[#A8A89E]'
+                                }
+                            `}
+                                aria-label="Stream"
                     >
                         <Waves className="w-5 h-5" strokeWidth={1.5} />
                         <span className="text-[10px] tracking-wider" style={{ fontWeight: 400 }}>
                             Stream
                         </span>
                     </Link>
-
+                    {/* アーカイブ */}
                     <Link
                         href="/archive"
                         className={`
-              flex flex-col items-center gap-1.5 transition-colors
-              ${isActive('/archive')
+                                    flex flex-col items-center gap-1.5 transition-colors
+                                    ${isActive('/archive')
                                 ? 'text-[#3D3D3A]'
                                 : 'text-[#A8A89E]'
                             }
-            `}
+                        `}
                         aria-label="Archive"
                     >
                         <Archive className="w-5 h-5" strokeWidth={1.5} />
@@ -70,6 +71,23 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             Archive
                         </span>
                     </Link>
+                    <Link
+                    href="/bookmarks"
+                    className={`
+                    flex flex-col items-center gap-1.5 transition-colors
+                    ${isActive('/bookmarks') 
+                        ? 'text-[#3D3D3A]' 
+                        : 'text-[#A8A89E]'
+                    }
+                    }
+                    `}
+                    aria-label="Bookmarks"
+                >
+                    <BookmarkIcon className="w-5 h-5" strokeWidth={1.5} />
+                    <span className="text-[10px] tracking-wider" style={{ fontWeight: 400 }}>
+                    Saved
+                    </span>
+                </Link>
                 </div>
             </nav>
 
@@ -82,6 +100,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
                 {/* ナビゲーションアイテム */}
                 <div className="flex flex-col gap-8">
+                    {/* コンポーズ */}
                     <Link
                         href="/compose"
                         className={`
@@ -96,7 +115,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     >
                         <PenLine className="w-6 h-6" strokeWidth={1.5} />
                     </Link>
-
+                    {/* ストリーム */}
                     <Link
                         href="/stream"
                         className={`
@@ -111,7 +130,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     >
                         <Waves className="w-6 h-6" strokeWidth={1.5} />
                     </Link>
-
+                    {/* アーカイブ */}
                     <Link
                         href="/archive"
                         className={`
@@ -126,6 +145,21 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     >
                         <Archive className="w-6 h-6" strokeWidth={1.5} />
                     </Link>
+                    {/* ブックマーク */}
+                    <Link
+                    href="/bookmarks"
+                    className={`
+          flex flex-col items-center gap-2 transition-all hover:scale-110
+          ${isActive('/bookmarks') 
+                            ? 'text-[#3D3D3A]' 
+                            : 'text-[#A8A89E]'
+                        }
+        `}
+                    aria-label="Bookmarks"
+                    title="Bookmarks"
+                >
+                    <BookmarkIcon className="w-6 h-6" strokeWidth={1.5} />
+                </Link>
                 </div>
 
                 {/* アクティブインディケーター*/}
