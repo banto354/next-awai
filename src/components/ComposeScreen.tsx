@@ -9,7 +9,7 @@ interface PostState {
   image: string | null;
   text: string;
   isPublic: boolean;
-  emotionalTags: string;
+  tags: string;
   locationAvailable: boolean;
 }
 
@@ -18,7 +18,7 @@ const initialState: PostState = {
   image: null,
   text: '',
   isPublic: false,
-  emotionalTags: '',
+  tags: '',
   locationAvailable: true,
 };
 
@@ -127,8 +127,8 @@ export function ComposeScreen() {
             </label>
             <input
               type="text"
-              value={post.emotionalTags}
-              onChange={(e) => setPost({...post, emotionalTags: e.target.value})}
+              value={post.tags}
+              onChange={(e) => setPost({...post, tags: e.target.value})}
               placeholder="春, 静寂, 発見..."
               className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[15px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
               style={{ fontWeight: 400 }}
