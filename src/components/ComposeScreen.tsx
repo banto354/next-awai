@@ -60,7 +60,7 @@ export function ComposeScreen() {
         )}
       </div>
 
-      {/* 画像アップロード (Desktop: 60%, Mobile: Full) */}
+      {/* 画像アップロード */}
       <div className="flex-1 px-6 pb-4 lg:w-3/5 lg:px-16 lg:py-16 lg:pb-16 lg:flex lg:flex-col lg:justify-center">
         {/* デスクトップヘッダー */}
         <div className="hidden lg:block mb-12">

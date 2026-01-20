@@ -7,17 +7,17 @@ import { PenLine, Waves, Archive } from "lucide-react";
 export function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
 
-    // Helper to check active state
+    // アクティブなパスを判定するヘルパー関数
     const isActive = (path: string) => pathname?.startsWith(path);
 
     return (
         <div className="flex flex-col h-screen max-w-[430px] lg:max-w-none mx-auto bg-[#FAFAF8] relative">
-            {/* Main Content */}
+            {/* メインコンテンツ */}
             <div className="flex-1 overflow-auto lg:ml-20 xl:ml-24">
                 {children}
             </div>
 
-            {/* Bottom Navigation - Mobile only, hidden on desktop */}
+            {/* ボトムナビゲーション（モバイル用） */}
             <nav className="border-t border-[#D4CFC3]/10 bg-[#FAFAF8]/95 backdrop-blur-sm lg:hidden fixed bottom-0 w-full max-w-[430px] z-50">
                 <div className="flex items-center justify-around px-6 py-4">
                     <Link
@@ -73,14 +73,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
             </nav>
 
-            {/* Desktop Navigation - Top sidebar, visible only on desktop */}
+            {/* デスクトップ用ナビゲーション - 上部サイドバー、デスクトップでのみ表示 */}
             <nav className="hidden lg:flex fixed top-0 left-0 h-full w-20 xl:w-24 border-r border-[#D4CFC3]/10 bg-[#F9F8F5]/95 backdrop-blur-sm flex-col items-center py-12 gap-12 z-50">
-                {/* Logo */}
+                {/* ロゴ */}
                 <div className="text-[11px] tracking-[0.2em] uppercase text-[#9B9890] rotate-0 mb-8">
                     AWAI
                 </div>
 
-                {/* Navigation Items */}
+                {/* ナビゲーションアイテム */}
                 <div className="flex flex-col gap-8">
                     <Link
                         href="/compose"
@@ -128,7 +128,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                 </div>
 
-                {/* Active indicator */}
+                {/* アクティブインディケーター*/}
                 <div className="mt-auto mb-8 flex flex-col gap-2">
                     <div
                         className="w-1 h-1 rounded-full mx-auto transition-all"
