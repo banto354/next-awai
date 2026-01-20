@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 
-interface DiaryEntry {
+interface PostEntry {
   id: string;
   image: string;
   text: string;
@@ -13,7 +14,7 @@ interface DiaryEntry {
   isPublic: boolean;
 }
 
-const mockEntries: DiaryEntry[] = [
+const mockEntries: PostEntry[] = [
   {
     id: '1',
     image: 'https://images.unsplash.com/photo-1766932102092-2799e86d0030?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwemVuJTIwbmF0dXJlfGVufDF8fHx8MTc2ODE5NzEwMHww&ixlib=rb-4.1.0&q=80&w=1080',
@@ -46,7 +47,7 @@ const mockEntries: DiaryEntry[] = [
 export function StreamScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
-
+  // モックからの抽出
   const currentEntry = mockEntries[currentIndex];
 
   const handleNext = () => {
@@ -73,7 +74,7 @@ export function StreamScreen() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAFAF8]">
-      {/* Header */}
+      {/* ヘッダー */}
       <div className="px-6 pt-12 pb-8 lg:px-16 lg:pt-16 lg:pb-12">
         <div className="flex items-center justify-between lg:max-w-4xl lg:mx-auto">
           <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">Stream</h1>
@@ -83,31 +84,36 @@ export function StreamScreen() {
         </div>
       </div>
 
-      {/* Main Content - Zen Mode with Generous Gutters */}
+      {/* 画像コンテンツ - Zen Mode with Generous Gutters */}
       <div className="flex-1 px-6 pb-8 flex flex-col gap-8 lg:px-16 lg:pb-16">
         <div className="lg:max-w-4xl lg:mx-auto w-full">
-          {/* Image */}
-          <div className="w-full aspect-[4/5] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
-            <img
+          {/* 画像 */}
+          <div className="relative w-full aspect-[4/5] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
+            <Image
               src={currentEntry.image}
               alt="Memory"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              // ブラウザに適切な画像サイズを選択させるための設定
+              sizes="(max-width: 1024px) 100vw, 80vw"
+              // 画面の主役となる画像なので、優先的に読み込む設定
+              priority
             />
           </div>
 
-          {/* Metadata */}
+          {/* メタデータ */}
           <div className="flex items-center justify-between text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide mt-8 lg:mt-12 lg:px-4">
             <span>{currentEntry.date}</span>
             <span>{currentEntry.weather}</span>
           </div>
 
-          {/* Text Content - Desktop: More generous spacing */}
+          {/* テキストコンテンツ - Desktop: More generous spacing */}
           <div className="flex-1 space-y-6 lg:space-y-10 mt-8 lg:mt-12 lg:px-4">
             <p className="text-[15px] lg:text-[18px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl" style={{ fontWeight: 400 }}>
               {currentEntry.text}
             </p>
 
-            {/* Tags */}
+            {/* タグ */}
             {currentEntry.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 lg:gap-3">
                 {currentEntry.tags.map((tag, index) => (
@@ -125,7 +131,7 @@ export function StreamScreen() {
         </div>
       </div>
 
-      {/* Navigation Controls - Desktop: Fixed at bottom center */}
+      {/* ナビゲーションコントロール　*/}
       <div className="px-6 pb-8 flex items-center justify-between lg:justify-center lg:gap-32 lg:pb-12 lg:max-w-4xl lg:mx-auto lg:w-full">
         <button
           onClick={handlePrevious}
@@ -135,7 +141,7 @@ export function StreamScreen() {
           <ChevronLeft className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
         </button>
 
-        {/* Shiori Bookmark Icon - Larger and more interactive on desktop */}
+        {/* ブックマークアイコン */}
         <button
           onClick={toggleBookmark}
           className="relative transition-all group"
@@ -149,7 +155,7 @@ export function StreamScreen() {
           />
           {/* Desktop hover tooltip */}
           <span className="hidden lg:block absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#3D3D3A] text-white text-[11px] tracking-wide rounded-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-            {isBookmarked ? 'Remove bookmark' : 'Save for later'}
+            {isBookmarked ? 'ブックマークを外す' : 'ブックマークする'}
           </span>
         </button>
 
