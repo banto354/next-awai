@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Bookmark, ArrowLeft, Lock, Globe } from 'lucide-react';
+import { Bookmark, Lock, Globe } from 'lucide-react';
 import { mockEntries } from '@/app/data/mockEntries';
 import { ArchiveEntry } from '@/app/types/entry';
+import Image from 'next/image';
+
 interface BookmarkListProps {
   onBack?: () => void;
   onEntryClick?: (entryId: string) => void;
@@ -62,9 +64,11 @@ export function BookmarksScreen({ onBack, onEntryClick }: BookmarkListProps) {
                 <div className="flex gap-4 lg:flex-col lg:gap-5">
                   {/* Thumbnail - Desktop: Full width */}
                   <div className="w-20 h-20 flex-shrink-0 bg-[#F5F4F0] rounded-sm overflow-hidden lg:w-full lg:h-48 lg:aspect-[4/3] relative">
-                    <img
+                    <Image
                       src={entry.image}
                       alt="Entry thumbnail"
+                      fill
+                      sizes="(max-width: 1024px) 80px, (max-width: 1280px) 50vw, 33vw"
                       className="w-full h-full object-cover transition-transform lg:group-hover:scale-105"
                     />
                     {/* Bookmark Badge */}
