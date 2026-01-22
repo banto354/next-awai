@@ -49,7 +49,7 @@ export function StreamScreen() {
       <div className="flex-1 px-6 pb-8 flex flex-col gap-8 lg:px-16 lg:pb-16">
         <div className="lg:max-w-4xl lg:mx-auto w-full">
           {/* 画像 */}
-          <div className="relative w-full aspect-[4/5] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
+          <div className="relative w-full aspect-[16/10] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
             <Image
               src={currentEntry.image}
               alt="Memory"

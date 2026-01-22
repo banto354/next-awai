@@ -11,7 +11,7 @@ interface BookmarkListProps {
   onEntryClick?: (entryId: string) => void;
 }
 
-export function BookmarksScreen({ onBack, onEntryClick }: BookmarkListProps) {
+export function BookmarksScreen({ onEntryClick }: BookmarkListProps) {
   const [bookmarkedEntries] = useState<ArchiveEntry[]>(
     mockEntries.filter(entry => entry.isBookmarked)
   );
