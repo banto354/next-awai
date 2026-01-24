@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PenLine, Waves, Archive, BookmarkIcon } from "lucide-react";
+import { PenLine, Waves, Archive, BookmarkIcon, CircleUser } from "lucide-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -30,7 +31,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                 : 'text-[#A8A89E]'
                             }
                             `}
-                            aria-label="Compose"
+                        aria-label="Compose"
                     >
                         <PenLine className="w-5 h-5" strokeWidth={1.5} />
                         <span className="text-[10px] tracking-wider" style={{ fontWeight: 400 }}>
@@ -43,11 +44,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         className={`
                             flex flex-col items-center gap-1.5 transition-colors
                             ${isActive('/stream') || pathname === '/'
-                                                ? 'text-[#3D3D3A]'
-                                                : 'text-[#A8A89E]'
-                                }
+                                ? 'text-[#3D3D3A]'
+                                : 'text-[#A8A89E]'
+                            }
                             `}
-                                aria-label="Stream"
+                        aria-label="Stream"
                     >
                         <Waves className="w-5 h-5" strokeWidth={1.5} />
                         <span className="text-[10px] tracking-wider" style={{ fontWeight: 400 }}>
@@ -71,23 +72,42 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             Archive
                         </span>
                     </Link>
+                    {/* ブックマーク */}
                     <Link
-                    href="/bookmarks"
-                    className={`
+                        href="/bookmarks"
+                        className={`
                     flex flex-col items-center gap-1.5 transition-colors
-                    ${isActive('/bookmarks') 
-                        ? 'text-[#3D3D3A]' 
-                        : 'text-[#A8A89E]'
-                    }
+                    ${isActive('/bookmarks')
+                                ? 'text-[#3D3D3A]'
+                                : 'text-[#A8A89E]'
+                            }
                     }
                     `}
-                    aria-label="Bookmarks"
-                >
-                    <BookmarkIcon className="w-5 h-5" strokeWidth={1.5} />
-                    <span className="text-[10px] tracking-wider" style={{ fontWeight: 400 }}>
-                    Saved
-                    </span>
-                </Link>
+                        aria-label="Bookmarks"
+                    >
+                        <BookmarkIcon className="w-5 h-5" strokeWidth={1.5} />
+                        <span className="text-[10px] tracking-wider" style={{ fontWeight: 400 }}>
+                            Saved
+                        </span>
+                    </Link>
+                    {/* ユーザー */}
+                    <SignedIn>
+                        <UserButton />
+                    </SignedIn>
+                    <SignedOut>
+                        <Link
+                            href="/sign-in"
+                            className={`
+                    flex flex-col items-center gap-1.5 text-[#A8A89E]
+                        `}
+                            aria-label="Sign In"
+                        >
+                            <CircleUser className="w-5 h-5" strokeWidth={1.5} />
+                            <span className="text-[10px] tracking-wider" style={{ fontWeight: 400 }}>
+                                Sign In
+                            </span>
+                        </Link>
+                    </SignedOut>
                 </div>
             </nav>
 
@@ -147,19 +167,34 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                     {/* ブックマーク */}
                     <Link
-                    href="/bookmarks"
-                    className={`
+                        href="/bookmarks"
+                        className={`
           flex flex-col items-center gap-2 transition-all hover:scale-110
-          ${isActive('/bookmarks') 
-                            ? 'text-[#3D3D3A]' 
-                            : 'text-[#A8A89E]'
-                        }
+          ${isActive('/bookmarks')
+                                ? 'text-[#3D3D3A]'
+                                : 'text-[#A8A89E]'
+                            }
         `}
-                    aria-label="Bookmarks"
-                    title="Bookmarks"
-                >
-                    <BookmarkIcon className="w-6 h-6" strokeWidth={1.5} />
-                </Link>
+                        aria-label="Bookmarks"
+                        title="Bookmarks"
+                    >
+                        <BookmarkIcon className="w-6 h-6" strokeWidth={1.5} />
+                    </Link>
+                    {/* ユーザー */}
+                    <SignedIn>
+                        <UserButton />
+                    </SignedIn>
+                    <SignedOut>
+                        <Link
+                            href="/sign-in"
+                            className={`
+                    flex flex-col items-center gap-1.5 text-[#A8A89E]
+                        `}
+                            aria-label="Sign In"
+                        >
+                            <CircleUser className="w-5 h-5" strokeWidth={1.5} />
+                        </Link>
+                    </SignedOut>
                 </div>
 
                 {/* アクティブインディケーター*/}
