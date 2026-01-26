@@ -12,10 +12,10 @@ datasource db {
   provider = "postgresql"
 }
 
-model Profile {
-  id          String     @id @default(uuid())
-  clerkId     String     @unique // Clerk等の認証プロバイダーのIDを紐付け
+model User {
+  id          String     @id
   userName    String     @unique
+  email       String     @unique
   displayName String?    @map("display_name")     
   userImage   String?    @map("user_image")
   createdAt   DateTime   @default(now()) @map("created_at")
@@ -25,7 +25,7 @@ model Profile {
   posts     Post[]
   bookmarks Bookmark[]
 
-  @@map("profiles")
+  @@map("users")
 }
 
 model Post {
@@ -44,7 +44,7 @@ model Post {
   updatedAt    DateTime     @updatedAt @map("updated_at")
 
   // リレーション
-  user         Profile       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   tags         TagsOnPosts[]
   bookmarkedBy Bookmark[]
 
@@ -83,7 +83,7 @@ model Bookmark {
   createdAt DateTime @default(now()) @map("created_at")
 
   // リレーション
-  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   post Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@id([userId, postId])
