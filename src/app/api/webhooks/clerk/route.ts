@@ -1,3 +1,4 @@
+import { prisma } from '@/lib/prisma'
 import { verifyWebhook } from '@clerk/nextjs/webhooks'
 import { NextRequest } from 'next/server'
 
@@ -9,8 +10,22 @@ export async function POST(req: NextRequest) {
         // For this guide, log payload to console
         const { id } = evt.data
         const eventType = evt.type
-        console.log(`Received webhook with ID ${id} and event type of ${eventType}`)
-        console.log('Webhook payload:', evt.data)
+        if (eventType === 'user.created') {
+            try {
+                await prisma.user.create({
+                    data: {
+                        id: evt.data.id,
+                        name: JSON.parse(body).data.username,
+                        image: JSON.parse(body).data.image_url,
+                        email: JSON.parse(body).data.email_addresses[0].email_address,
+                    }
+                })
+                return new Response("ユーザーの作成に成功しました。", { status: 200 })
+            } catch (err) {
+                console.log(err);
+                return new Response("ユーザーの作成に失敗しました。", { status: 500 })
+            }
+        }
 
         return new Response('Webhook received', { status: 200 })
     } catch (err) {
