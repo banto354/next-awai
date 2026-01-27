@@ -15,10 +15,11 @@ export async function POST(req: NextRequest) {
                 const { id, username, image_url, email_addresses } = evt.data;
                 const email = email_addresses && email_addresses.length > 0 ? email_addresses[0].email_address : "";
 
+
                 await prisma.user.create({
                     data: {
                         id: id as string,
-                        userName: username as string,
+                        userName: username || `user_${id}` as string,
                         userImage: image_url as string,
                         email: email,
                     }
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
                         id: id as string,
                     },
                     data: {
-                        userName: username as string,
+                        userName: username || `user_${id}` as string,
                         userImage: image_url as string,
                         email: email,
                     }
