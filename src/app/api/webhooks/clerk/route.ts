@@ -12,12 +12,15 @@ export async function POST(req: NextRequest) {
         const eventType = evt.type
         if (eventType === 'user.created') {
             try {
+                const { id, username, image_url, email_addresses } = evt.data;
+                const email = email_addresses && email_addresses.length > 0 ? email_addresses[0].email_address : "";
+
                 await prisma.user.create({
                     data: {
-                        id: evt.data.id,
-                        name: JSON.parse(body).data.username,
-                        image: JSON.parse(body).data.image_url,
-                        email: JSON.parse(body).data.email_addresses[0].email_address,
+                        id: id as string,
+                        userName: username as string,
+                        userImage: image_url as string,
+                        email: email,
                     }
                 })
                 return new Response("ユーザーの作成に成功しました。", { status: 200 })
@@ -28,14 +31,17 @@ export async function POST(req: NextRequest) {
         }
         if (eventType === 'user.updated') {
             try {
+                const { id, username, image_url, email_addresses } = evt.data;
+                const email = email_addresses && email_addresses.length > 0 ? email_addresses[0].email_address : "";
+
                 await prisma.user.update({
                     where: {
-                        id: evt.data.id,
+                        id: id as string,
                     },
                     data: {
-                        userName: evt.data.username,
-                        userImage: evt.data.image_url,
-                        email: evt.data.email_addresses[0].email_address,
+                        userName: username as string,
+                        userImage: image_url as string,
+                        email: email,
                     }
                 })
                 return new Response("ユーザーの更新に成功しました。", { status: 200 })
