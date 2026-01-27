@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String     @id
+  userName    String     @unique
+  email       String     @unique
+  displayName String?    @map("display_name")     
+  userImage   String?    @map("user_image")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // リレーション
+  posts     Post[]
+  bookmarks Bookmark[]
+
+  @@map("users")
+}
+
+model Post {
+  id           String       @id @default(uuid())
+  userId       String       @map("user_id")
+  content      String       // 40〜50文字（バリデーションはアプリ側で実施）
+  imageUrl     String?      @map("image_url")
+  latitude     Float
+  longitude    Float
+  placeName    String       @map("place_name")
+  locationType LocationType @default(gps) @map("location_type")
+  temp         Float        // 気温
+  weatherId    Int          @map("weather_id")
+  isPublic     Boolean      @default(false) @map("is_public")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  // リレーション
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags         TagsOnPosts[]
+  bookmarkedBy Bookmark[]
+
+  // インデックス：気温での検索を高速化
+  @@index([temp])
+  @@map("posts")
+}
+
+enum LocationType {
+  gps
+  manual
+}
+
+model Tag {
+  id    String        @id @default(uuid())
+  name  String        @unique
+  posts TagsOnPosts[]
+
+  @@map("tags")
+}
+
+// 多対多の中間テーブル（明示的に定義）
+model TagsOnPosts {
+  postId String @map("post_id")
+  tagId  String @map("tag_id")
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+model Bookmark {
+  userId    String   @map("user_id")
+  postId    String   @map("post_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // リレーション
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@map("bookmarks")
+}
