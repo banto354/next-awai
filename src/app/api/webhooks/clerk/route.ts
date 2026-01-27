@@ -33,9 +33,9 @@ export async function POST(req: NextRequest) {
                         id: evt.data.id,
                     },
                     data: {
-                        name: JSON.parse(body).data.username,
-                        image: JSON.parse(body).data.image_url,
-                        email: JSON.parse(body).data.email_addresses[0].email_address,
+                        userName: evt.data.username,
+                        userImage: evt.data.image_url,
+                        email: evt.data.email_addresses[0].email_address,
                     }
                 })
                 return new Response("ユーザーの更新に成功しました。", { status: 200 })
