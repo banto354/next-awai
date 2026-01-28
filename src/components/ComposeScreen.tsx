@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from 'react';
-import { ImagePlus, CloudRain, Lock, Globe } from 'lucide-react';
+import { ImagePlus, CloudRain, Lock, Globe, Form } from 'lucide-react';
 import Image from 'next/image';
+import { useFormStatus } from 'react-dom';
+import { addPostAction } from '@/app/compose/action';
 
 // 投稿データの形状を定義
 interface PostState {
@@ -22,6 +24,22 @@ const initialState: PostState = {
   locationAvailable: true,
 };
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  console.log('SubmitButton pending:', pending);
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="px-8 lg:px-12 py-2.5 lg:py-3 bg-[#D4CFC3] text-[#3D3D3A] text-[13px] lg:text-[14px] tracking-[0.08em] rounded-sm transition-all hover:opacity-80 hover:shadow-md"
+      style={{ fontWeight: 400 }}
+      onClick={() => console.log('SubmitButton clicked')}
+    >
+      {pending ? '保存中...' : '保存'}
+    </button>
+  );
+}
+
 export function ComposeScreen() {
   // 1つのオブジェクトとしてStateを定義
   const [post, setPost] = useState<PostState>(initialState);
@@ -31,14 +49,14 @@ export function ComposeScreen() {
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        setPost({...post, image: event.target?.result as string});
+        setPost({ ...post, image: event.target?.result as string });
       };
       reader.readAsDataURL(file);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAF8] lg:flex-row lg:gap-0">
+    <form action={addPostAction} className="min-h-screen flex flex-col bg-[#FAFAF8] lg:flex-row lg:gap-0">
       {/* モバイル用ヘッダー */}
       <div className="px-6 pt-12 pb-6 lg:hidden">
         <div className="flex items-start justify-between">
@@ -48,11 +66,13 @@ export function ComposeScreen() {
           <div className="flex items-center gap-2 text-[#A8A89E]">
             <CloudRain className="w-4 h-4" />
             {/* 気候情報取得要 */}
+            {/* 仮置き */}
             <span className="text-[13px] tracking-wide">10°C / Rain</span>
           </div>
         </div>
 
         {/* ロケーション */}
+        {/* 仮置き */}
         {!post.locationAvailable && (
           <div className="mt-4 text-[11px] text-[#9B9890] tracking-wide bg-gradient-to-r from-[#E8E6E0] to-transparent py-2 px-3 rounded-sm">
             どこか
@@ -81,7 +101,7 @@ export function ComposeScreen() {
               alt="Uploaded memory"
               fill
               className="object-cover" // 画面幅に応じた最適化（モバイルはフル幅、デスクトップは最大幅を考慮）
-              sizes="(max-width: 1024px) 100vw, 1200px" 
+              sizes="(max-width: 1024px) 100vw, 1200px"
               priority // 投稿画面のメインビジュアルなので優先的に読み込み
             />
           ) : (
@@ -97,6 +117,7 @@ export function ComposeScreen() {
           accept="image/*"
           onChange={handleImageUpload}
           className="hidden"
+          name="image"
         />
 
         {/* デスクトップ時の天気表示 */}
@@ -114,10 +135,11 @@ export function ComposeScreen() {
         <div className="flex-1 lg:flex-initial lg:space-y-8">
           <textarea
             value={post.text}
-            onChange={(e) => setPost({...post, text: e.target.value})}
+            onChange={(e) => setPost({ ...post, text: e.target.value })}
             placeholder="Write a quiet thought..."
             className="w-full h-32 lg:h-48 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[16px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide"
             style={{ fontWeight: 400 }}
+            name="text"
           />
 
           {/* タグ */}
@@ -128,10 +150,11 @@ export function ComposeScreen() {
             <input
               type="text"
               value={post.tags}
-              onChange={(e) => setPost({...post, tags: e.target.value})}
+              onChange={(e) => setPost({ ...post, tags: e.target.value })}
               placeholder="春, 静寂, 発見..."
               className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[15px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
               style={{ fontWeight: 400 }}
+              name="tags"
             />
           </div>
         </div>
@@ -139,7 +162,8 @@ export function ComposeScreen() {
         {/* 公開設定 */}
         <div className="flex items-center justify-between pt-4 lg:pt-12 lg:border-t lg:border-[#D4CFC3]/10">
           <button
-            onClick={() => setPost({...post, isPublic: !post.isPublic})}
+            type="button"
+            onClick={() => setPost({ ...post, isPublic: !post.isPublic })}
             className="flex items-center gap-3 text-[13px] lg:text-[14px] text-[#A8A89E] tracking-wide transition-colors hover:text-[#3D3D3A]"
             style={{ fontWeight: 400 }}
           >
@@ -155,15 +179,11 @@ export function ComposeScreen() {
               </>
             )}
           </button>
-
-          <button
-            className="px-8 lg:px-12 py-2.5 lg:py-3 bg-[#D4CFC3] text-[#3D3D3A] text-[13px] lg:text-[14px] tracking-[0.08em] rounded-sm transition-all hover:opacity-80 hover:shadow-md"
-            style={{ fontWeight: 400 }}
-          >
-            保存
-          </button>
+          <input type="hidden" name="isPublic" value={post.isPublic ? 'true' : 'false'} />
+          <input type="hidden" name="locationAvailable" value={String(post.locationAvailable)} />
+          <SubmitButton />
         </div>
       </div>
-    </div>
+    </form>
   );
 }

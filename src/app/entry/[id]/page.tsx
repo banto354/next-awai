@@ -2,7 +2,6 @@ import { EntryDetailFeed } from '@/components/EntryDetailFeed';
 import { mockEntries } from '@/app/data/mockEntries';
 import { notFound } from 'next/navigation';
 
-// Next.js 15+ 向けの型定義
 interface PageProps {
   params: Promise<{ id: string }>;
 }
