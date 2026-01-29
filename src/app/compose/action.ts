@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { z } from 'zod';
 
 // Supabaseクライアントの作成（管理者権限でストレージを操作するため）
 const supabase = createClient(
@@ -29,13 +30,22 @@ export async function addPostAction(formData: FormData) {
     const lngStr = formData.get('longitude') as string;
     // 画像のアップロード処理
     let imageUrl: string | null = null;
+    // バリデーション
+    const schema = z.object({
+        text: z.string().min(1, "テキストは必須です"),
+        image: z.string().min(1, "画像は必須です"),
+        isPublic: z.boolean(),
+        tags: z.string(),
+        latitude: z.string(),
+        longitude: z.string(),
+    });
 
     if (imageFile && imageFile.size > 0) {
         // ファイル名をユニークにする (例: user_id/timestamp-random.png)
         const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${imageFile.name.split('.').pop()}`;
 
         const { data, error } = await supabase.storage
-            .from('awai-posts') // ★Supabaseでこのバケットを作成しておく必要があります
+            .from('post-image') // ★Supabase内のバケット名
             .upload(fileName, imageFile, {
                 contentType: imageFile.type,
                 upsert: false,
@@ -48,7 +58,7 @@ export async function addPostAction(formData: FormData) {
 
         // 公開URLを取得
         const { data: publicUrlData } = supabase.storage
-            .from('awai-posts')
+            .from('post-image')
             .getPublicUrl(fileName);
 
         imageUrl = publicUrlData.publicUrl;
@@ -95,3 +105,4 @@ export async function addPostAction(formData: FormData) {
         revalidatePath('/'); // タイムライン等を更新
         redirect('/archive'); // トップページへ戻る
     }
+}
