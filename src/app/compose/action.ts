@@ -70,6 +70,18 @@ export async function addPostAction(prevState: any, formData: FormData) {
             .map((t) => t.trim())
             .filter((t) => t.length > 0); // 空文字を除去
         console.log('タグの処理');
+
+        const validatedFields = schema.safeParse({
+            text: text,
+            isPublic: isPublic,
+            tags: tagsString,
+            latitude: latStr,
+            longitude: lngStr,
+        });
+
+        if (!validatedFields.success) {
+            return { success: false, error: "入力内容に誤りがあります" };
+        }
         // データベースへの保存
         try {
             console.log('データベースへの保存');
@@ -97,7 +109,6 @@ export async function addPostAction(prevState: any, formData: FormData) {
                     },
                 },
             });
-            return { success: true, error: "" };
         } catch (error) {
             if (error instanceof z.ZodError) {
                 console.error('バリデーションエラー:', error);
@@ -114,7 +125,7 @@ export async function addPostAction(prevState: any, formData: FormData) {
         console.log('画像を選択してください');
         return { success: false, error: "画像を選択してください" };
     }
-    //　完了後の処理
-    // revalidatePath('/'); // タイムライン等を更新    
-    // redirect('/archive'); // トップページへ戻る
+    // 　完了後の処理
+    revalidatePath('/'); // タイムライン等を更新    
+    redirect('/archive'); // トップページへ戻る
 }
