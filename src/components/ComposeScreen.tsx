@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from 'react';
-import { ImagePlus, CloudRain, Lock, Globe, Form } from 'lucide-react';
+import { ImagePlus, CloudRain, Lock, Globe, X } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { addPostAction } from '@/app/compose/action';
@@ -45,6 +45,9 @@ export function ComposeScreen() {
   const [formState, dispatch] = useActionState(addPostAction, { success: false, error: '' });
   // UI用のStateを定義
   const [post, setPost] = useState<PostState>(initialState);
+  // タグ管理用のState
+  const [tagList, setTagList] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,6 +58,47 @@ export function ComposeScreen() {
       };
       reader.readAsDataURL(file);
     }
+  };
+  // タグ入力のキーボード操作
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // 変換中（IME使用中）はイベントを無視する（これを入れないと変換確定のエンターでタグが作られてしまう）
+    if (e.nativeEvent.isComposing) return;
+
+    // スペース判定(e.key === ' ')を削除し、Enterのみにする
+    if (e.key === 'Enter') {
+      e.preventDefault(); // フォーム送信を防ぐ
+
+      const newTag = tagInput.trim();
+      // 重複チェックと空文字チェック
+      if (newTag && !tagList.includes(newTag)) {
+        const newTags = [...tagList, newTag];
+        setTagList(newTags);
+        setPost({ ...post, tags: newTags.join(',') });
+        setTagInput("");
+      }
+    }
+    // バックスペースで削除（変更なし）
+    else if (e.key === 'Backspace' && tagInput === '' && tagList.length > 0) {
+      const newTags = tagList.slice(0, -1);
+      setTagList(newTags);
+      setPost({ ...post, tags: newTags.join(',') });
+    }
+  };
+  const handleTagBlur = () => {
+    const newTag = tagInput.trim();
+    if (newTag && !tagList.includes(newTag)) {
+      const newTags = [...tagList, newTag];
+      setTagList(newTags);
+      setPost({ ...post, tags: newTags.join(',') });
+      setTagInput("");
+    }
+  };
+
+  // タグの削除機能
+  const removeTag = (tagToRemove: string) => {
+    const newTags = tagList.filter(tag => tag !== tagToRemove);
+    setTagList(newTags);
+    setPost({ ...post, tags: newTags.join(',') });
   };
 
   return (
@@ -150,15 +194,41 @@ export function ComposeScreen() {
             <label className="text-[11px] tracking-[0.12em] uppercase text-[#9B9890]" style={{ fontWeight: 400 }}>
               タグ
             </label>
-            <input
-              type="text"
-              value={post.tags}
-              onChange={(e) => setPost({ ...post, tags: e.target.value })}
-              placeholder="春, 静寂, 発見..."
-              className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[15px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
-              style={{ fontWeight: 400 }}
-              name="tags"
-            />
+            <div className="flex flex-wrap items-center gap-2 w-full border-[#D4CFC3]/20 py-2 min-h-[40px]">
+              {/* 実際の入力欄 */}
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                onBlur={handleTagBlur}
+                placeholder={tagList.length === 0 ? "春, 静寂, 発見..." : ""}
+                className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[15px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
+                style={{ fontWeight: 400 }}
+                name="tags"
+              />
+              {/* 確定したタグの表示 */}
+              {tagList.map((tag) => (
+                <span
+                  key={tag}
+                  className="flex items-center gap-1 bg-[#E8E6E0] text-[#A8A89E] px-3 py-1 rounded-full text-[13px] transition-colors hover:bg-[#D4CFC3]/50"
+                >
+                  #{tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="hover:text-[#3D3D3A]"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+            {/* サーバー送信用の隠しフィールド（重要） */}
+            {/* これがないとフォーム送信時にタグが送られません */}
+            <input type="hidden" name="tags" value={post.tags} />
+
+
           </div>
         </div>
 
