@@ -185,9 +185,13 @@ export function ComposeScreen() {
           <input type="hidden" name="isPublic" value={post.isPublic ? 'true' : 'false'} />
           <input type="hidden" name="locationAvailable" value={String(post.locationAvailable)} />
           <SubmitButton />
+
+        </div>
+        <div>
+          {formState.error && <p className="text-red-500">{formState.error}</p>}
         </div>
       </div>
-      {formState.error && <p className="text-red-500">{formState.error}</p>}
+
     </form>
 
   );

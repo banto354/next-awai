@@ -31,10 +31,11 @@ export async function addPostAction(prevState: any, formData: FormData) {
     // 画像のアップロード処理
     let imageUrl: string | null = null;
     // バリデーション
+    console.log('バリデーション');
     const schema = z.object({
         text: z.string().min(1, "テキストは必須です"),
         image: z.string().min(1, "画像は必須です"),
-        isPublic: z.boolean(),
+        isPublic: z.string().transform((val) => val === 'true'),
         tags: z.string(),
         latitude: z.string(),
         longitude: z.string(),
@@ -50,7 +51,7 @@ export async function addPostAction(prevState: any, formData: FormData) {
                 contentType: imageFile.type,
                 upsert: false,
             });
-
+        console.log('画像のアップロード');
         if (error) {
             console.error('Upload Error:', error);
             return { success: false, error: "画像のアップロードに失敗しました" };
@@ -68,7 +69,7 @@ export async function addPostAction(prevState: any, formData: FormData) {
             .split(',')
             .map((t) => t.trim())
             .filter((t) => t.length > 0); // 空文字を除去
-
+        console.log('タグの処理');
         // データベースへの保存
         try {
             console.log('データベースへの保存');
@@ -98,11 +99,22 @@ export async function addPostAction(prevState: any, formData: FormData) {
             });
             return { success: true, error: "" };
         } catch (error) {
-            console.error('データベースエラー:', error);
-            return { success: false, error: "投稿の保存に失敗しました" };
+            if (error instanceof z.ZodError) {
+                console.error('バリデーションエラー:', error);
+                return { success: false, error: "入力内容に誤りがあります" };
+            } else if (error instanceof Error) {
+                console.error('データベースエラー:', error);
+                return { success: false, error: "投稿の保存に失敗しました" };
+            } else {
+                console.error('予期せぬエラー:', error);
+                return { success: false, error: "予期せぬエラーが発生しました" };
+            }
         }
+    } else {
+        console.log('画像を選択してください');
+        return { success: false, error: "画像を選択してください" };
     }
     //　完了後の処理
-    revalidatePath('/'); // タイムライン等を更新    
-    redirect('/archive'); // トップページへ戻る
+    // revalidatePath('/'); // タイムライン等を更新    
+    // redirect('/archive'); // トップページへ戻る
 }
