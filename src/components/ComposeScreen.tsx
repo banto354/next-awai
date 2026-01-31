@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useActionState, useState } from 'react';
 import { ImagePlus, CloudRain, Lock, Globe, Form } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
@@ -41,7 +41,9 @@ function SubmitButton() {
 }
 
 export function ComposeScreen() {
-  // 1つのオブジェクトとしてStateを定義
+  // フォームの状態管理
+  const [formState, dispatch] = useActionState(addPostAction, { success: false, error: '' });
+  // UI用のStateを定義
   const [post, setPost] = useState<PostState>(initialState);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,7 +58,7 @@ export function ComposeScreen() {
   };
 
   return (
-    <form action={addPostAction} className="min-h-screen flex flex-col bg-[#FAFAF8] lg:flex-row lg:gap-0">
+    <form action={dispatch} className="min-h-screen flex flex-col bg-[#FAFAF8] lg:flex-row lg:gap-0">
       {/* モバイル用ヘッダー */}
       <div className="px-6 pt-12 pb-6 lg:hidden">
         <div className="flex items-start justify-between">
@@ -91,6 +93,7 @@ export function ComposeScreen() {
             </div>
           )}
         </div>
+
         <label
           htmlFor="image-upload"
           className="block h-full aspect-[16/10] bg-[#F5F4F0] border border-[#D4CFC3]/20 rounded-sm cursor-pointer transition-all hover:bg-[#E8E6E0]/30 hover:border-[#D4CFC3]/40 relative overflow-hidden lg:shadow-sm"
@@ -184,6 +187,8 @@ export function ComposeScreen() {
           <SubmitButton />
         </div>
       </div>
+      {formState.error && <p className="text-red-500">{formState.error}</p>}
     </form>
+
   );
 }

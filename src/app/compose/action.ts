@@ -13,11 +13,11 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function addPostAction(formData: FormData) {
+export async function addPostAction(prevState: any, formData: FormData) {
     // 認証チェック
     const { userId } = await auth();
     if (!userId) {
-        throw new Error("ログインしていません");
+        return { success: false, error: "ログインしていません" };
     }
     console.log('フォームデータ');
     // フォームデータの取得
@@ -53,7 +53,7 @@ export async function addPostAction(formData: FormData) {
 
         if (error) {
             console.error('Upload Error:', error);
-            throw new Error("画像のアップロードに失敗しました");
+            return { success: false, error: "画像のアップロードに失敗しました" };
         }
 
         // 公開URLを取得
@@ -96,13 +96,13 @@ export async function addPostAction(formData: FormData) {
                     },
                 },
             });
+            return { success: true, error: "" };
         } catch (error) {
             console.error('データベースエラー:', error);
-            throw new Error("投稿の保存に失敗しました");
+            return { success: false, error: "投稿の保存に失敗しました" };
         }
-
-        //　完了後の処理
-        revalidatePath('/'); // タイムライン等を更新
-        redirect('/archive'); // トップページへ戻る
     }
+    //　完了後の処理
+    revalidatePath('/'); // タイムライン等を更新    
+    redirect('/archive'); // トップページへ戻る
 }
