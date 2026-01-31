@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "posts" ALTER COLUMN "latitude" DROP NOT NULL,
+ALTER COLUMN "longitude" DROP NOT NULL,
+ALTER COLUMN "place_name" DROP NOT NULL,
+ALTER COLUMN "location_type" DROP NOT NULL,
+ALTER COLUMN "temp" DROP NOT NULL,
+ALTER COLUMN "weather_id" DROP NOT NULL;

@@ -34,12 +34,12 @@ model Post {
   userId       String       @map("user_id")
   content      String       // 40〜50文字（バリデーションはアプリ側で実施）
   imageUrl     String?      @map("image_url")
-  latitude     Float
-  longitude    Float
-  placeName    String       @map("place_name")
-  locationType LocationType @default(gps) @map("location_type")
-  temp         Float        // 気温
-  weatherId    Int          @map("weather_id")
+  latitude     Float?
+  longitude    Float?
+  placeName    String?       @map("place_name")
+  locationType LocationType? @default(gps) @map("location_type")
+  temp         Float?        // 気温
+  weatherId    Int?          @map("weather_id")
   isPublic     Boolean      @default(false) @map("is_public")
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
