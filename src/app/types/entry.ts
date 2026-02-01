@@ -22,9 +22,9 @@ export interface Entry {
   temperature: number;
   tags: string[];
   isBookmarked?: boolean;
-  author: {
+  user: {
+    userName: string;
     displayName: string;
-    username: string;
-    image: string;
+    userImage: string;
   };
 }

@@ -81,14 +81,14 @@ export function BookmarkCard({ entry }: BookmarkCardProps) {
             </div>
           )}
           {/* 作成ユーザー情報 */}
-          {entry.author && (
+          {entry.user && (
             <div className="flex items-center gap-2 mt-4 lg:mt-5 pt-3 lg:pt-4 border-t border-[#E8E6E0]/50">
               {/* Tiny Avatar */}
               <div className="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
-                {entry.author.avatar ? (
+                {entry.user.userImage ? (
                   <img
-                    src={entry.author.avatar}
-                    alt={entry.author.name}
+                    src={entry.user.userImage}
+                    alt={entry.user.displayName}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -101,7 +101,7 @@ export function BookmarkCard({ entry }: BookmarkCardProps) {
                 className="text-[11px] lg:text-[12px] text-[#A8A89E] tracking-wide"
                 style={{ fontWeight: 400 }}
               >
-                {entry.author.name}
+                {entry.user.displayName}
               </span>
             </div>
           )}

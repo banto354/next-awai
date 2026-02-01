@@ -20,6 +20,7 @@ const bookmarks = await prisma.bookmark.findMany({
     include: {
         post: {
             include: {
+                user: true,
                 tags: {
                     include: {
                         tag: true,
@@ -42,6 +43,11 @@ const bookmarkedEntries: Entry[] = bookmarks.map((bookmark) => ({
     isBookmarked: true, // ブックマークページなので true
     latitude: bookmark.post.latitude ?? 0,
     longitude: bookmark.post.longitude ?? 0,
+    user: {
+        userName: bookmark.post.user.userName,
+        displayName: bookmark.post.user.displayName || bookmark.post.user.userName,
+        userImage: bookmark.post.user.userImage || "",
+    },
 }));
 
 export default function BookmarksPage() {
