@@ -1,7 +1,7 @@
 export async function getCurrentWeather(lat: number, lon: number) {
     const apiKey = process.env.OPENWEATHER_API_KEY;
     if (!apiKey) {
-        console.error("OpenWeatherMap API Key is missing");
+        console.error("OpenWeatherMap API Key is missing, check .env file");
         return null;
     }
 

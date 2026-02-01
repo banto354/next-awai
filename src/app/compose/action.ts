@@ -29,12 +29,10 @@ export async function addPostAction(prevState: any, formData: FormData) {
     const tagsString = formData.get('tags') as string;
     console.log('tagsString', tagsString);
     // 位置情報（後述の修正が必要）
-    // const latStr = formData.get('latitude') as string;
-    const latStr = 35.6821315
-    // const lngStr = formData.get('longitude') as string;
-    const lngStr = 139.7661275
-    const latitude = latStr || 0;
-    const longitude = lngStr || 0;
+    const latStr = formData.get('latitude') as string;
+    const lngStr = formData.get('longitude') as string;
+    const latitude = Number(latStr) || 0;
+    const longitude = Number(lngStr) || 0;
 
     // 天気情報の取得
     let weatherInfo = null;

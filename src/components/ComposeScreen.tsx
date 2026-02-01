@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { ImagePlus, CloudRain, Lock, Globe, X } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { addPostAction } from '@/app/compose/action';
+import { useLocationWeather } from '@/hooks/useLocationWeather';
 
 // 投稿データの形状を定義
 interface PostState {
@@ -12,15 +13,23 @@ interface PostState {
   text: string;
   isPublic: boolean;
   tags: string;
+  temp: number;
+  weather: string;
+  // longitude: number;
+  // latitude: number;
   locationAvailable: boolean;
 }
 
-// 初期値の設定
+// 初期値の設定ß
 const initialState: PostState = {
   image: null,
   text: '',
   isPublic: false,
   tags: '',
+  temp: 0,
+  weather: '',
+  // longitude: 0,
+  // latitude: 0,
   locationAvailable: true,
 };
 
@@ -48,6 +57,9 @@ export function ComposeScreen() {
   // タグ管理用のState
   const [tagList, setTagList] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  // 天気情報
+  const { location, weather, loading } = useLocationWeather();
+
   // 画像のアップロード処理
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -109,7 +121,7 @@ export function ComposeScreen() {
             <CloudRain className="w-4 h-4" />
             {/* 気候情報取得要 */}
             {/* 仮置き */}
-            <span className="text-[13px] tracking-wide">10°C / Rain</span>
+            <span className="text-[13px] tracking-wide">{weather?.temp} / {weather?.description}</span>
           </div>
         </div>
 
@@ -166,7 +178,7 @@ export function ComposeScreen() {
         {/* デスクトップ時の天気表示 */}
         <div className="hidden lg:flex items-center gap-2 text-[#A8A89E] mt-6">
           <CloudRain className="w-4 h-4" />
-          <span className="text-[13px] tracking-wide">10°C / Rain</span>
+          <span className="text-[13px] tracking-wide">{weather?.temp}°C / {weather?.description}</span>
         </div>
       </div>
 
@@ -248,6 +260,8 @@ export function ComposeScreen() {
           </button>
           <input type="hidden" name="isPublic" value={post.isPublic ? 'true' : 'false'} />
           <input type="hidden" name="locationAvailable" value={String(post.locationAvailable)} />
+          <input type="hidden" name="latitude" value={location?.lat ?? ""} />
+          <input type="hidden" name="longitude" value={location?.lng ?? ""} />
           <SubmitButton />
 
         </div>
