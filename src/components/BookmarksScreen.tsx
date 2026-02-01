@@ -2,19 +2,24 @@
 
 import { useState } from 'react';
 import { Bookmark, Lock, Globe } from 'lucide-react';
-import { mockEntries } from '@/app/data/mockEntries';
-import { ArchiveEntry } from '@/app/types/entry';
+import { Entry } from '@/app/types/entry';
 import Image from 'next/image';
+import Link from 'next/link';
 
-interface BookmarkListProps {
-  onBack?: () => void;
-  onEntryClick?: (entryId: string) => void;
+// interface BookmarkListProps {
+//   onBack?: () => void;
+//   onEntryClick?: (entryId: string) => void;
+// }
+
+interface BookmarksScreenProps {
+  bookmarkedEntries: Entry[];
+  // onEntryClick?: (entryId: string) => void;
 }
 
-export function BookmarksScreen({ onEntryClick }: BookmarkListProps) {
-  const [bookmarkedEntries] = useState<ArchiveEntry[]>(
-    mockEntries.filter(entry => entry.isBookmarked)
-  );
+export function BookmarksScreen({ bookmarkedEntries }: BookmarksScreenProps) {
+  // const [bookmarkedEntries] = useState<Entry[]>(
+  //   bookmarkedEntries.filter(entry => entry.isBookmarked)
+  // );
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-8 lg:pb-16">
@@ -53,9 +58,9 @@ export function BookmarksScreen({ onEntryClick }: BookmarkListProps) {
         <div className="space-y-1 lg:space-y-0 lg:px-16">
           <div className="lg:max-w-7xl lg:mx-auto lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
             {bookmarkedEntries.map((entry) => (
-              <div
+              <Link
+                href={`/entry/${entry.id}`}
                 key={entry.id}
-                onClick={() => onEntryClick?.(entry.id)}
                 className="px-6 py-6 transition-all hover:bg-[#E8E6E0]/30 cursor-pointer lg:px-8 lg:py-8 lg:rounded-sm lg:border lg:border-transparent lg:hover:border-[#D4CFC3]/20 lg:hover:shadow-md group"
                 style={{
                   backgroundColor: entry.isPublic ? '#FAFAF8' : '#F9F8F5',
@@ -73,9 +78,9 @@ export function BookmarksScreen({ onEntryClick }: BookmarkListProps) {
                     />
                     {/* Bookmark Badge */}
                     <div className="absolute top-2 right-2 bg-[#FAFAF8]/90 backdrop-blur-sm rounded-sm p-1.5">
-                      <Bookmark 
-                        className="w-3 h-3 fill-[#D4CFC3] stroke-[#D4CFC3]" 
-                        strokeWidth={1.5} 
+                      <Bookmark
+                        className="w-3 h-3 fill-[#D4CFC3] stroke-[#D4CFC3]"
+                        strokeWidth={1.5}
                       />
                     </div>
                   </div>
@@ -124,7 +129,7 @@ export function BookmarksScreen({ onEntryClick }: BookmarkListProps) {
                     )}
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
