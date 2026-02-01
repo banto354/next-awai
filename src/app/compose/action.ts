@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { getCurrentWeather } from '@/lib/weather';
 
 // Supabaseクライアントの作成（管理者権限でストレージを操作するため）
 const supabase = createClient(
@@ -30,6 +31,16 @@ export async function addPostAction(prevState: any, formData: FormData) {
     // 位置情報（後述の修正が必要）
     const latStr = formData.get('latitude') as string;
     const lngStr = formData.get('longitude') as string;
+    const latitude = parseFloat(latStr) || 0;
+    const longitude = parseFloat(lngStr) || 0;
+
+    // 天気情報の取得
+    let weatherInfo = null;
+    if (latitude !== 0 && longitude !== 0) {
+        weatherInfo = await getCurrentWeather(latitude, longitude);
+        console.log("Weather fetched:", weatherInfo);
+    }
+
     // 画像のアップロード処理
     let imageUrl: string | null = null;
     // バリデーション
@@ -83,8 +94,6 @@ export async function addPostAction(prevState: any, formData: FormData) {
         // データベースへの保存
         try {
             console.log('データベースへの保存');
-            console.log('タグの配列');
-            console.log(tagNames);
             await prisma.post.create({
                 data: {
                     userId: userId,
@@ -92,8 +101,10 @@ export async function addPostAction(prevState: any, formData: FormData) {
                     imageUrl: imageUrl,
                     isPublic: isPublic,
                     // 位置情報: 数値に変換。取得できていない場合は一旦 0 などを入れるかエラーにする
-                    latitude: parseFloat(latStr) || 0,
-                    longitude: parseFloat(lngStr) || 0,
+                    latitude: latitude || 0,
+                    longitude: longitude || 0,
+                    temp: weatherInfo?.temp ?? null,
+                    weatherId: weatherInfo?.weatherId ?? null,
                     // タグのリレーション保存
                     tags: {
                         create: tagNames.map((name) => ({
