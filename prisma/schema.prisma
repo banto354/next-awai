@@ -14,13 +14,13 @@ datasource db {
 }
 
 model User {
-  id          String     @id
-  userName    String     @unique
-  email       String     @unique
-  displayName String?    @map("display_name")     
-  userImage   String?    @map("user_image")
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
+  id          String   @id
+  userName    String   @unique
+  email       String   @unique
+  displayName String?  @map("display_name")
+  userImage   String?  @map("user_image")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   // リレーション
   posts     Post[]
@@ -30,22 +30,21 @@ model User {
 }
 
 model Post {
-  id           String       @id @default(uuid())
-  userId       String       @map("user_id")
-  content      String       // 40〜50文字（バリデーションはアプリ側で実施）
-  imageUrl     String?      @map("image_url")
+  id           String        @id @default(uuid())
+  userId       String        @map("user_id")
+  content      String // 40〜50文字（バリデーションはアプリ側で実施）
+  imageUrl     String?       @map("image_url")
   latitude     Float?
   longitude    Float?
-  placeName    String?       @map("place_name")
   locationType LocationType? @default(gps) @map("location_type")
-  temp         Float?        // 気温
+  temp         Float? // 気温
   weatherId    Int?          @map("weather_id")
-  isPublic     Boolean      @default(false) @map("is_public")
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
+  isPublic     Boolean       @default(false) @map("is_public")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
 
   // リレーション
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   tags         TagsOnPosts[]
   bookmarkedBy Bookmark[]
 
@@ -85,7 +84,7 @@ model Bookmark {
 
   // リレーション
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@id([userId, postId])
   @@map("bookmarks")

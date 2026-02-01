@@ -9,3 +9,17 @@ export interface ArchiveEntry {
   isPublic: boolean;
   isBookmarked?: boolean;
 }
+
+export interface Entry {
+  id: string;
+  image: string;
+  text: string;
+  isPublic: boolean;
+  latitude: number;
+  longitude: number;
+  date: string;
+  weather: string;
+  temperature: number;
+  tags: string[];
+  isBookmarked?: boolean;
+}
