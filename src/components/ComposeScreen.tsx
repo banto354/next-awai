@@ -48,7 +48,7 @@ export function ComposeScreen() {
   // タグ管理用のState
   const [tagList, setTagList] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-
+  // 画像のアップロード処理
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -61,10 +61,10 @@ export function ComposeScreen() {
   };
   // タグ入力のキーボード操作
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // 変換中（IME使用中）はイベントを無視する（これを入れないと変換確定のエンターでタグが作られてしまう）
+    // 変換中（IME使用中）はイベントを無視する
     if (e.nativeEvent.isComposing) return;
 
-    // スペース判定(e.key === ' ')を削除し、Enterのみにする
+    // Enterの判定でタグを追加
     if (e.key === 'Enter') {
       e.preventDefault(); // フォーム送信を防ぐ
 
@@ -76,12 +76,8 @@ export function ComposeScreen() {
         setPost({ ...post, tags: newTags.join(',') });
         setTagInput("");
       }
-    }
-    // バックスペースで削除（変更なし）
-    else if (e.key === 'Backspace' && tagInput === '' && tagList.length > 0) {
-      const newTags = tagList.slice(0, -1);
-      setTagList(newTags);
-      setPost({ ...post, tags: newTags.join(',') });
+      console.log('taglist', tagList);
+      console.log('tags', post.tags);
     }
   };
   const handleTagBlur = () => {
@@ -205,7 +201,7 @@ export function ComposeScreen() {
                 placeholder={tagList.length === 0 ? "春, 静寂, 発見..." : ""}
                 className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[15px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
                 style={{ fontWeight: 400 }}
-                name="tags"
+              // name="tags"
               />
               {/* 確定したタグの表示 */}
               {tagList.map((tag) => (
@@ -224,10 +220,8 @@ export function ComposeScreen() {
                 </span>
               ))}
             </div>
-            {/* サーバー送信用の隠しフィールド（重要） */}
-            {/* これがないとフォーム送信時にタグが送られません */}
+            {/* サーバー送信用の隠しフィールド */}
             <input type="hidden" name="tags" value={post.tags} />
-
 
           </div>
         </div>
@@ -261,7 +255,7 @@ export function ComposeScreen() {
       {formState.error && (
         <div className="fixed bottom-24 left-6 right-6 z-50 animate-in slide-in-from-bottom-2 bg-red-50/95 backdrop-blur-md border border-red-100 px-4 py-3 rounded-sm shadow-sm lg:bottom-10 lg:left-auto lg:right-10 lg:translate-x-0 lg:w-auto lg:min-w-[300px] lg:rounded-md">
           <div className="flex items-center justify-center gap-2">
-            {/* 警告アイコン（オプション） */}
+            {/* 警告アイコン */}
             <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
