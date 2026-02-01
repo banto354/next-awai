@@ -94,8 +94,6 @@ export async function addPostAction(prevState: any, formData: FormData) {
                     // 位置情報: 数値に変換。取得できていない場合は一旦 0 などを入れるかエラーにする
                     latitude: parseFloat(latStr) || 0,
                     longitude: parseFloat(lngStr) || 0,
-                    placeName: "Unknown", // 一旦仮置き（必要なら逆ジオコーディングで取得）
-
                     // タグのリレーション保存
                     tags: {
                         create: tagNames.map((name) => ({

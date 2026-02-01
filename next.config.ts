@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**', // すべてのパスを許可
       },
+      {
+        protocol: 'https',
+        hostname: 'hyidvyqonxepapoidfdf.supabase.co', // エラーメッセージに出ているホスト名
+        port: '',
+        pathname: '/storage/v1/object/public/**', // Supabaseストレージのパス規則
+      },
     ],
   },
 };

@@ -6,13 +6,16 @@ import { TemperatureFilter } from './features/archive/TemperatureFilter';
 import { mockEntries } from '@/app/data/mockEntries';
 import { ArchiveEntry, Entry } from '@/app/types/entry';
 
+
+
 // const Archive: ArchiveEntry[] = mockEntries;
 
 // Propsの定義（この画面専用の受け皿）
 interface ArchiveScreenProps {
   initialEntries: Entry[]; // ★共通のEntry型を使う
 }
-export function ArchiveScreen(initialEntries: Entry[]) {
+
+export function ArchiveScreen({ initialEntries }: ArchiveScreenProps) {
   const [filterActive, setFilterActive] = useState(false);
   const currentTemp = 10; // Mock current temperature
 
