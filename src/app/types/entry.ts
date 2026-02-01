@@ -18,7 +18,7 @@ export interface Entry {
   latitude: number;
   longitude: number;
   date: string;
-  weather: string;
+  weatherId: number;
   temperature: number;
   tags: string[];
   isBookmarked?: boolean;
