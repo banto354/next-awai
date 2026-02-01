@@ -4,23 +4,30 @@ import { useState } from 'react';
 import { ArchiveCard } from './features/archive/ArchiveCard';
 import { TemperatureFilter } from './features/archive/TemperatureFilter';
 import { mockEntries } from '@/app/data/mockEntries';
-import { ArchiveEntry } from '@/app/types/entry';
+import { ArchiveEntry, Entry } from '@/app/types/entry';
 
-const mockArchive: ArchiveEntry[] = mockEntries;
 
-export function ArchiveScreen() {
+
+// const Archive: ArchiveEntry[] = mockEntries;
+
+// Propsの定義（この画面専用の受け皿）
+interface ArchiveScreenProps {
+  initialEntries: Entry[]; // ★共通のEntry型を使う
+}
+
+export function ArchiveScreen({ initialEntries }: ArchiveScreenProps) {
   const [filterActive, setFilterActive] = useState(false);
   const currentTemp = 10; // Mock current temperature
 
   const filteredEntries = filterActive
-    ? mockArchive.filter((entry) => entry.temperature === currentTemp)
-    : mockArchive;
+    ? initialEntries.filter((entry) => entry.temperature === currentTemp)
+    : initialEntries;
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-8 lg:pb-16">
       {/* ヘッダー */}
       <div className="px-6 pt-12 pb-6 lg:px-16 lg:pt-16 lg:pb-8">
-        <div className="lg:max-w-7xl lg:mx-auto"> 
+        <div className="lg:max-w-7xl lg:mx-auto">
           <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">過去の投稿</h1>
         </div>
       </div>

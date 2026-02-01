@@ -2,21 +2,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Lock, Globe } from 'lucide-react';
 import { TagList } from '@/components/ui/tagList';
+import { Entry } from '@/app/types/entry';
 
 // プロパティの型定義
-interface ArchiveEntry {
-  id: string;
-  image: string;
-  text: string;
-  date: string;
-  weather: string;
-  temperature: number;
-  tags: string[];
-  isPublic: boolean;
-}
-
 interface ArchiveCardProps {
-  entry: ArchiveEntry;
+  entry: Entry;
 }
 
 export function ArchiveCard({ entry }: ArchiveCardProps) {
@@ -64,7 +54,7 @@ export function ArchiveCard({ entry }: ArchiveCardProps) {
             </div>
 
             {/* タグ */}
-                <TagList tags={entry.tags}/>    
+            <TagList tags={entry.tags} />
           </div>
         </div>
       </div>
