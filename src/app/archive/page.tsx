@@ -4,7 +4,6 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Entry } from "../types/entry";
 
-
 export default async function ArchivePage() {
     // 認証チェック
     const { userId } = await auth();
