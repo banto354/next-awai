@@ -22,9 +22,11 @@ export async function addPostAction(prevState: any, formData: FormData) {
     console.log('フォームデータ');
     // フォームデータの取得
     const text = formData.get('text') as string;
+    console.log('text', text);
     const imageFile = formData.get('image') as File;
     const isPublic = formData.get('isPublic') === 'true';
     const tagsString = formData.get('tags') as string;
+    console.log('tagsString', tagsString);
     // 位置情報（後述の修正が必要）
     const latStr = formData.get('latitude') as string;
     const lngStr = formData.get('longitude') as string;
@@ -34,11 +36,9 @@ export async function addPostAction(prevState: any, formData: FormData) {
     console.log('バリデーション');
     const schema = z.object({
         text: z.string().min(1, "テキストは必須です"),
-        image: z.string().min(1, "画像は必須です"),
-        isPublic: z.string().transform((val) => val === 'true'),
         tags: z.string(),
-        latitude: z.string(),
-        longitude: z.string(),
+        // latitude: z.string(),
+        // longitude: z.string(),
     });
 
     if (imageFile && imageFile.size > 0) {
@@ -73,18 +73,18 @@ export async function addPostAction(prevState: any, formData: FormData) {
 
         const validatedFields = schema.safeParse({
             text: text,
-            isPublic: isPublic,
             tags: tagsString,
-            latitude: latStr,
-            longitude: lngStr,
         });
 
         if (!validatedFields.success) {
+            console.log('バリデーションエラー', validatedFields.error);
             return { success: false, error: "入力内容に誤りがあります" };
         }
         // データベースへの保存
         try {
             console.log('データベースへの保存');
+            console.log('タグの配列');
+            console.log(tagNames);
             await prisma.post.create({
                 data: {
                     userId: userId,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from 'react';
-import { ImagePlus, CloudRain, Lock, Globe, Form } from 'lucide-react';
+import { ImagePlus, CloudRain, Lock, Globe, X } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { addPostAction } from '@/app/compose/action';
@@ -45,7 +45,10 @@ export function ComposeScreen() {
   const [formState, dispatch] = useActionState(addPostAction, { success: false, error: '' });
   // UI用のStateを定義
   const [post, setPost] = useState<PostState>(initialState);
-
+  // タグ管理用のState
+  const [tagList, setTagList] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  // 画像のアップロード処理
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -55,6 +58,43 @@ export function ComposeScreen() {
       };
       reader.readAsDataURL(file);
     }
+  };
+  // タグ入力のキーボード操作
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // 変換中（IME使用中）はイベントを無視する
+    if (e.nativeEvent.isComposing) return;
+
+    // Enterの判定でタグを追加
+    if (e.key === 'Enter') {
+      e.preventDefault(); // フォーム送信を防ぐ
+
+      const newTag = tagInput.trim();
+      // 重複チェックと空文字チェック
+      if (newTag && !tagList.includes(newTag)) {
+        const newTags = [...tagList, newTag];
+        setTagList(newTags);
+        setPost({ ...post, tags: newTags.join(',') });
+        setTagInput("");
+      }
+      console.log('taglist', tagList);
+      console.log('tags', post.tags);
+    }
+  };
+  const handleTagBlur = () => {
+    const newTag = tagInput.trim();
+    if (newTag && !tagList.includes(newTag)) {
+      const newTags = [...tagList, newTag];
+      setTagList(newTags);
+      setPost({ ...post, tags: newTags.join(',') });
+      setTagInput("");
+    }
+  };
+
+  // タグの削除機能
+  const removeTag = (tagToRemove: string) => {
+    const newTags = tagList.filter(tag => tag !== tagToRemove);
+    setTagList(newTags);
+    setPost({ ...post, tags: newTags.join(',') });
   };
 
   return (
@@ -150,15 +190,39 @@ export function ComposeScreen() {
             <label className="text-[11px] tracking-[0.12em] uppercase text-[#9B9890]" style={{ fontWeight: 400 }}>
               タグ
             </label>
-            <input
-              type="text"
-              value={post.tags}
-              onChange={(e) => setPost({ ...post, tags: e.target.value })}
-              placeholder="春, 静寂, 発見..."
-              className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[15px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
-              style={{ fontWeight: 400 }}
-              name="tags"
-            />
+            <div className="flex flex-wrap items-center gap-2 w-full border-[#D4CFC3]/20 py-2 min-h-[40px]">
+              {/* 実際の入力欄 */}
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                onBlur={handleTagBlur}
+                placeholder={tagList.length === 0 ? "春, 静寂, 発見..." : ""}
+                className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[15px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
+                style={{ fontWeight: 400 }}
+              // name="tags"
+              />
+              {/* 確定したタグの表示 */}
+              {tagList.map((tag) => (
+                <span
+                  key={tag}
+                  className="flex items-center gap-1 bg-[#E8E6E0] text-[#A8A89E] px-3 py-1 rounded-full text-[13px] transition-colors hover:bg-[#D4CFC3]/50"
+                >
+                  #{tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="hover:text-[#3D3D3A]"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+            {/* サーバー送信用の隠しフィールド */}
+            <input type="hidden" name="tags" value={post.tags} />
+
           </div>
         </div>
 
@@ -191,7 +255,7 @@ export function ComposeScreen() {
       {formState.error && (
         <div className="fixed bottom-24 left-6 right-6 z-50 animate-in slide-in-from-bottom-2 bg-red-50/95 backdrop-blur-md border border-red-100 px-4 py-3 rounded-sm shadow-sm lg:bottom-10 lg:left-auto lg:right-10 lg:translate-x-0 lg:w-auto lg:min-w-[300px] lg:rounded-md">
           <div className="flex items-center justify-center gap-2">
-            {/* 警告アイコン（オプション） */}
+            {/* 警告アイコン */}
             <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
