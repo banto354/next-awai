@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Lock, Globe } from 'lucide-react';
+import { Lock, Globe, Bookmark } from 'lucide-react';
 import { TagList } from '@/components/ui/tagList';
 import { Entry } from '@/app/types/entry';
 

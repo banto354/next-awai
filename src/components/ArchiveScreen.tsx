@@ -3,12 +3,7 @@
 import { useState } from 'react';
 import { ArchiveCard } from './features/archive/ArchiveCard';
 import { TemperatureFilter } from './features/archive/TemperatureFilter';
-import { mockEntries } from '@/app/data/mockEntries';
-import { ArchiveEntry, Entry } from '@/app/types/entry';
-
-
-
-// const Archive: ArchiveEntry[] = mockEntries;
+import { Entry } from '@/app/types/entry';
 
 // Propsの定義（この画面専用の受け皿）
 interface ArchiveScreenProps {
