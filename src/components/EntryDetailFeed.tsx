@@ -1,147 +1,125 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Lock, Globe, Bookmark } from 'lucide-react';
-import { mockEntries } from '@/app/data/mockEntries';
-import { ArchiveEntry } from '@/app/types/entry';
+import { useState } from 'react';
+import { Bookmark, ChevronLeft } from 'lucide-react'; // 戻るボタン用にChevronLeftを追加
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Entry } from '@/app/types/entry';
 
 interface EntryDetailFeedProps {
-  initialEntryId?: string;
-  onBack?: () => void;
+  entry: Entry;
 }
 
-export function EntryDetailFeed({ initialEntryId, onBack }: EntryDetailFeedProps) {
-  const [entries] = useState<ArchiveEntry[]>(mockEntries);
-  const [currentIndex, setCurrentIndex] = useState(0);
+export function EntryDetailFeed({ entry }: EntryDetailFeedProps) {
+  const router = useRouter();
 
-  // 最初の投稿インデックスを設定
-  useEffect(() => {
-    if (initialEntryId) {
-      const index = entries.findIndex(entry => entry.id === initialEntryId);
-      if (index !== -1) {
-        setCurrentIndex(index);
-        // エントリーまでスクロール
-        setTimeout(() => {
-          document.getElementById(`entry-${initialEntryId}`)?.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }, 100);
-      }
-    }
-  }, [initialEntryId, entries]);
+  // UI上のブックマーク状態管理
+  const [isBookmarked, setIsBookmarked] = useState(entry.isBookmarked);
+
+  const toggleBookmark = () => {
+    setIsBookmarked(!isBookmarked);
+    // TODO: ここで Server Action を呼んでDB更新を行う
+
+  };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8]">
-      {/* バックボタン */}
-      {/* <div className="fixed top-6 left-6 z-50 lg:left-32">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-[#3D3D3A] hover:text-[#9B9890] transition-colors"
-          aria-label="Back to Archive"
-        >
-          <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
-          <span className="text-[11px] tracking-[0.15em] uppercase" style={{ fontWeight: 400 }}>
-            Archive
-          </span>
-        </button>
-      </div> */}
-
-      {/* 垂直フィード */}
-      <div className="pt-24 pb-16">
-        {entries.map((entry, index) => (
-          <div
-            key={entry.id}
-            id={`entry-${entry.id}`}
-            className="mb-16 last:mb-0"
+    <div className="min-h-screen flex flex-col bg-[#FAFAF8]">
+      {/* ヘッダー */}
+      <div className="px-6 pt-12 pb-8 lg:px-16 lg:pt-16 lg:pb-12">
+        <div className="flex items-center justify-between lg:max-w-4xl lg:mx-auto">
+          {/* 戻るボタン機能付きのヘッダー */}
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-[#9B9890] hover:text-[#3D3D3A] transition-colors group"
           >
-            {/* 投稿コンテナ */}
-            <div className="max-w-2xl mx-auto px-6 lg:px-8">
-              {/* 画像 */}
-              {/* <div className="mb-6 aspect-[4/5] lg:aspect-square overflow-hidden rounded-sm bg-[#F5F4F0]">
-                <Image
-                    src={entry.image}
-                    alt={entry.text}
-                    fill
-                    sizes="(max-width: 1024px) 80px, (max-width: 1280px) 50vw, 33vw"
-                    className="w-full h-full object-cover"
-                />
-              </div> */}
-            <div className="relative aspect-[16/10] w-full bg-[#F5F4F0] rounded-sm overflow-hidden shadow-sm mb-8 lg:aspect-[16/10] lg:mb-12">
-                <Image
+            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            <h1 className="text-[13px] tracking-[0.15em] uppercase">Entry</h1>
+          </button>
+        </div>
+      </div>
+
+      {/* 画像コンテンツ - StreamScreenのデザインを踏襲 */}
+      <div className="flex-1 px-6 pb-8 flex flex-col gap-8 lg:px-16 lg:pb-16">
+        <div className="lg:max-w-4xl lg:mx-auto w-full">
+
+          {/* 画像 */}
+          <div className="relative w-full aspect-[16/10] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
+            {entry.image ? (
+              <Image
                 src={entry.image}
                 alt="Memory"
                 fill
                 className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 80vw"
                 priority
-                />
-            </div>
-
-              {/* テキストコンテンツ */}
-              <div className="space-y-6">
-                {/* メインテキスト */}
-                <p
-                  className="text-[16px] lg:text-[18px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] tracking-wide"
-                  style={{ fontWeight: 400 }}
-                >
-                  {entry.text}
-                </p>
-
-                {/* メタデータ */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-[12px] text-[#9B9890] tracking-wide">
-                    <span>{entry.date}</span>
-                    <span className="text-[#D4CFC3]">·</span>
-                    <span>{entry.weather}</span>
-                    <span className="text-[#D4CFC3]">·</span>
-                    <span>{entry.temperature}°C</span>
-                  </div>
-
-                  {/* アイコン */}
-                  <div className="flex items-center gap-3 text-[#A8A89E]">
-                    {entry.isPublic ? (
-                      <Globe className="w-4 h-4" strokeWidth={1.5} />
-                    ) : (
-                      <Lock className="w-4 h-4" strokeWidth={1.5} />
-                    )}
-                    {entry.isBookmarked && (
-                      <Bookmark className="w-4 h-4 fill-[#D4CFC3] stroke-[#D4CFC3]" strokeWidth={1.5} />
-                    )}
-                  </div>
-                </div>
-
-                {/* タグ */}
-                {entry.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {entry.tags.map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className="text-[11px] text-[#A8A89E] tracking-wider"
-                        style={{ fontWeight: 400 }}
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 分割 */}
-            {index < entries.length - 1 && (
-              <div className="mt-16 max-w-2xl mx-auto px-6 lg:px-8">
-                <div className="h-px bg-[#E8E6E0]" />
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[#D4CFC3]">
+                No Image
               </div>
             )}
           </div>
-        ))}
+
+          {/* メタデータ */}
+          <div className="flex items-center justify-between text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide mt-8 lg:mt-12 lg:px-4">
+            <div className="flex gap-4">
+              <span>{entry.date}</span>
+              <span>{entry.weather}</span>
+              {entry.temperature !== null && <span>{entry.temperature}°C</span>}
+            </div>
+
+            {/* ブックマークボタン (メタデータ列に配置) */}
+            <button
+              onClick={toggleBookmark}
+              className="transition-all hover:scale-110"
+              aria-label="Bookmark this entry"
+            >
+              <Bookmark
+                className="w-5 h-5"
+                strokeWidth={1.5}
+                fill={isBookmarked ? '#C5A088' : 'none'}
+                stroke={isBookmarked ? '#C5A088' : '#A8A89E'}
+              />
+            </button>
+          </div>
+
+          {/* テキストコンテンツ */}
+          <div className="flex-1 space-y-6 lg:space-y-10 mt-8 lg:mt-12 lg:px-4">
+            <p
+              className="text-[15px] lg:text-[18px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl"
+              style={{ fontWeight: 400 }}
+            >
+              {entry.text}
+            </p>
+
+            {/* タグ */}
+            {entry.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 lg:gap-3">
+                {entry.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[12px] tracking-wider rounded-full transition-colors hover:bg-[#D4CFC3]/30"
+                    style={{ fontWeight: 400 }}
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* スクロールインジケーター */}
-      {/* <div className="fixed bottom-8 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.2em] uppercase text-[#9B9890] opacity-50">
-        Scroll for more
-      </div> */}
+      {/* フッター / プライバシーインジケーター */}
+      <div className="px-6 pb-8 flex justify-center">
+        <div
+          className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full"
+          style={{
+            backgroundColor: entry.isPublic ? '#A8A89E' : '#D4CFC3'
+          }}
+          title={entry.isPublic ? "Public" : "Private"}
+        />
+      </div>
     </div>
   );
 }
