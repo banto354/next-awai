@@ -32,7 +32,8 @@ export default async function ArchivePage() {
         image: post.imageUrl || "", // nullの場合は空文字などでフォールバック
         text: post.content,
         date: post.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }), // "Jan 11" のような形式に
-        weather: post.weatherId ? getWeatherLabel(post.weatherId) : "天気不明", // ※DBにweatherカラムがない場合、一旦固定値か、別途取得ロジックが必要
+        weather: post.weatherId ? getWeatherLabel(post.weatherId) : "天気不明",
+        weatherId: post.weatherId,
         temperature: post.temp ?? 0, // nullの場合は0
         tags: post.tags.map((t) => t.tag.name), // タグオブジェクトから名前の配列へ
         isPublic: post.isPublic,

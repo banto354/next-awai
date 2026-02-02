@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Lock, Globe, Bookmark } from 'lucide-react';
 import { TagList } from '@/components/ui/tagList';
 import { Entry } from '@/app/types/entry';
+import { getWeatherLabel } from '@/lib/weatherUtils';
 
 // プロパティの型定義
 interface BookmarkCardProps {
@@ -53,7 +54,7 @@ export function BookmarkCard({ entry }: BookmarkCardProps) {
             <div className="flex items-center gap-3 text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide">
               <span>{entry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
-              <span>{entry.weather}</span>
+              <span>{entry.temperature} / {getWeatherLabel(entry.weatherId)}</span>
             </div>
 
             {/* Privacy Icon */}

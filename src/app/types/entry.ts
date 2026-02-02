@@ -1,16 +1,4 @@
-export interface ArchiveEntry {
-  id: string;
-  image: string;
-  text: string;
-  date: string;
-  weather: string;
-  temperature: number;
-  tags: string[];
-  isPublic: boolean;
-  isBookmarked?: boolean;
-}
-
-export interface Entry {
+export interface BaseEntry {
   id: string;
   image: string;
   text: string;
@@ -18,10 +6,18 @@ export interface Entry {
   latitude: number;
   longitude: number;
   date: string;
+  weather: string;
   weatherId: number;
   temperature: number;
   tags: string[];
   isBookmarked?: boolean;
+}
+
+export interface ArchiveEntry extends BaseEntry {
+
+}
+
+export interface BookmarkEntry extends BaseEntry {
   user: {
     userName: string;
     displayName: string;
