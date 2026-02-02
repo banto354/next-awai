@@ -1,17 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-import { Bookmark, ChevronLeft } from 'lucide-react'; // 戻るボタン用にChevronLeftを追加
+import { useState, useTransition } from 'react';
+import { Bookmark, ChevronLeft, Trash2 } from 'lucide-react'; // 戻るボタン用にChevronLeftを追加
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Entry } from '@/app/types/entry';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // コンポーネントのパスは環境に合わせて調整してください
+import { deletePostAction } from '@/app/compose/action'; // Actionをインポート
 
 interface EntryDetailFeedProps {
   entry: Entry;
+  isAuthor: boolean;
 }
 
-export function EntryDetailFeed({ entry }: EntryDetailFeedProps) {
+export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   // UI上のブックマーク状態管理
   const [isBookmarked, setIsBookmarked] = useState(entry.isBookmarked);
@@ -20,6 +34,15 @@ export function EntryDetailFeed({ entry }: EntryDetailFeedProps) {
     setIsBookmarked(!isBookmarked);
     // TODO: ここで Server Action を呼んでDB更新を行う
 
+  };
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      const result = await deletePostAction(entry.id, entry.image);
+      if (result?.error) {
+        alert(result.error); // 簡易エラー表示
+      }
+    });
   };
 
   return (
@@ -69,20 +92,66 @@ export function EntryDetailFeed({ entry }: EntryDetailFeedProps) {
               <span className="text-[#D4CFC3]">/</span>
               <span>{entry.weather}</span>
             </div>
+            <div className="flex items-center gap-4">
+              {/* 削除ボタン (所有者のみ表示) */}
+              {isAuthor && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      className="transition-all hover:scale-110 text-[#A8A89E] hover:text-[#C5A088]" // ホバー時に警告色（Soft Clay）に
+                      aria-label="Delete entry"
+                    >
+                      <Trash2 className="w-5 h-5" strokeWidth={1.5} />
+                    </button>
+                  </AlertDialogTrigger>
 
-            {/* ブックマークボタン (メタデータ列に配置) */}
-            <button
-              onClick={toggleBookmark}
-              className="transition-all hover:scale-110"
-              aria-label="Bookmark this entry"
-            >
-              <Bookmark
-                className="w-5 h-5"
-                strokeWidth={1.5}
-                fill={isBookmarked ? '#C5A088' : 'none'}
-                stroke={isBookmarked ? '#C5A088' : '#A8A89E'}
-              />
-            </button>
+                  {/* ダイアログ本体: 背景色をAWAIのペーパーカラー(#FAFAF8)に合わせ、枠線をアクセントカラーに */}
+                  <AlertDialogContent className="bg-[#FAFAF8] border-[#D4CFC3] shadow-md p-8 sm:rounded-sm max-w-[400px]">
+                    <AlertDialogHeader className="space-y-3">
+                      <AlertDialogTitle className="text-[#3D3D3A] tracking-wider text-[16px] font-medium">
+                        この投稿を削除しますか？
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="text-[#9B9890] text-[13px] leading-relaxed tracking-wide">
+                        この操作は取り消すことができません。<br />
+                        投稿と画像データは完全に削除されます。
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <AlertDialogFooter className="mt-6 gap-3 sm:gap-0">
+                      {/* キャンセルボタン: 背景透明、枠線あり、文字はグレー */}
+                      <AlertDialogCancel
+                        className="border-[#D4CFC3] text-[#9B9890] hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50 bg-transparent text-[13px] tracking-wide h-10 px-6 rounded-sm transition-colors"
+                      >
+                        キャンセル
+                      </AlertDialogCancel>
+
+                      {/* 削除ボタン: AWAIのDestructiveカラー(#C5A088)を使用 */}
+                      {/* hover時に少し濃くして「押せる感」と「警告感」を出す */}
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        disabled={isPending}
+                        className="bg-[#C5A088] hover:bg-[#B08D75] text-white border-none text-[13px] tracking-wide h-10 px-6 rounded-sm shadow-sm transition-colors"
+                      >
+                        {isPending ? '処理中...' : '削除する'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+              {/* ブックマークボタン (メタデータ列に配置) */}
+              <button
+                onClick={toggleBookmark}
+                className="transition-all hover:scale-110"
+                aria-label="Bookmark this entry"
+              >
+                <Bookmark
+                  className="w-5 h-5"
+                  strokeWidth={1.5}
+                  fill={isBookmarked ? '#C5A088' : 'none'}
+                  stroke={isBookmarked ? '#C5A088' : '#A8A89E'}
+                />
+              </button>
+            </div>
           </div>
 
           {/* テキストコンテンツ */}
