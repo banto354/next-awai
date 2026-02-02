@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { ImagePlus, CloudRain, Lock, Globe, X } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { addPostAction } from '@/app/compose/action';
+import { useLocationWeather } from '@/hooks/useLocationWeather';
 
 // 投稿データの形状を定義
 interface PostState {
@@ -12,6 +13,8 @@ interface PostState {
   text: string;
   isPublic: boolean;
   tags: string;
+  // longitude: number;
+  // latitude: number;
   locationAvailable: boolean;
 }
 
@@ -21,6 +24,8 @@ const initialState: PostState = {
   text: '',
   isPublic: false,
   tags: '',
+  // longitude: 0,
+  // latitude: 0,
   locationAvailable: true,
 };
 
@@ -48,6 +53,9 @@ export function ComposeScreen() {
   // タグ管理用のState
   const [tagList, setTagList] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  // 天気情報
+  const { location, weather, loading } = useLocationWeather();
+
   // 画像のアップロード処理
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,18 +116,9 @@ export function ComposeScreen() {
           <div className="flex items-center gap-2 text-[#A8A89E]">
             <CloudRain className="w-4 h-4" />
             {/* 気候情報取得要 */}
-            {/* 仮置き */}
-            <span className="text-[13px] tracking-wide">10°C / Rain</span>
+            <span className="text-[13px] tracking-wide">{weather?.temp} / {weather?.description}</span>
           </div>
         </div>
-
-        {/* ロケーション */}
-        {/* 仮置き */}
-        {!post.locationAvailable && (
-          <div className="mt-4 text-[11px] text-[#9B9890] tracking-wide bg-gradient-to-r from-[#E8E6E0] to-transparent py-2 px-3 rounded-sm">
-            どこか
-          </div>
-        )}
       </div>
 
       {/* 画像アップロード */}
@@ -166,7 +165,7 @@ export function ComposeScreen() {
         {/* デスクトップ時の天気表示 */}
         <div className="hidden lg:flex items-center gap-2 text-[#A8A89E] mt-6">
           <CloudRain className="w-4 h-4" />
-          <span className="text-[13px] tracking-wide">10°C / Rain</span>
+          <span className="text-[13px] tracking-wide">{weather?.temp}°C / {weather?.description}</span>
         </div>
       </div>
 
@@ -248,6 +247,11 @@ export function ComposeScreen() {
           </button>
           <input type="hidden" name="isPublic" value={post.isPublic ? 'true' : 'false'} />
           <input type="hidden" name="locationAvailable" value={String(post.locationAvailable)} />
+          <input type="hidden" name="latitude" value={location?.lat ?? ""} />
+          <input type="hidden" name="longitude" value={location?.lng ?? ""} />
+          <input type="hidden" name="temp" value={weather?.temp ?? 0} />
+          <input type="hidden" name="weather" value={weather?.description ?? "天気不明"} />
+          <input type="hidden" name="weatherId" value={weather?.weatherId ?? 0} />
           <SubmitButton />
 
         </div>

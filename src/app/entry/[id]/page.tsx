@@ -3,6 +3,7 @@ import { mockEntries } from '@/app/data/mockEntries';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Entry } from '@/app/types/entry';
+import { getWeatherLabel } from '@/lib/weatherUtils';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -36,8 +37,9 @@ export default async function EntryPage({ params }: PageProps) {
     image: post.imageUrl || "",
     text: post.content,
     date: post.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    weather: "Clear", // 必要に応じてDBから取得
-    temperature: post.temp ?? 0,
+    weatherId: post.weatherId ?? 0,
+    weather: getWeatherLabel(post.weatherId),
+    temperature: Math.round(post.temp ?? 0),
     tags: post.tags.map((t) => t.tag.name),
     isPublic: post.isPublic,
     latitude: post.latitude ?? 0,

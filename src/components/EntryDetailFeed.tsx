@@ -64,8 +64,10 @@ export function EntryDetailFeed({ entry }: EntryDetailFeedProps) {
           <div className="flex items-center justify-between text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide mt-8 lg:mt-12 lg:px-4">
             <div className="flex gap-4">
               <span>{entry.date}</span>
+              <span className="text-[#D4CFC3]">·</span>
+              <span>{entry.temperature} °C</span>
+              <span className="text-[#D4CFC3]">/</span>
               <span>{entry.weather}</span>
-              {entry.temperature !== null && <span>{entry.temperature}°C</span>}
             </div>
 
             {/* ブックマークボタン (メタデータ列に配置) */}

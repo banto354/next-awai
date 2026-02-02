@@ -19,17 +19,21 @@ export async function addPostAction(prevState: any, formData: FormData) {
     if (!userId) {
         return { success: false, error: "ログインしていません" };
     }
-    console.log('フォームデータ');
+
     // フォームデータの取得
     const text = formData.get('text') as string;
-    console.log('text', text);
     const imageFile = formData.get('image') as File;
     const isPublic = formData.get('isPublic') === 'true';
     const tagsString = formData.get('tags') as string;
-    console.log('tagsString', tagsString);
     // 位置情報（後述の修正が必要）
     const latStr = formData.get('latitude') as string;
     const lngStr = formData.get('longitude') as string;
+    const latitude = Number(latStr) || 0;
+    const longitude = Number(lngStr) || 0;
+    const weather = formData.get('weather') as string;
+    const weatherId = formData.get('weatherId') as string;
+    const temp = formData.get('temp') as string;
+
     // 画像のアップロード処理
     let imageUrl: string | null = null;
     // バリデーション
@@ -69,7 +73,6 @@ export async function addPostAction(prevState: any, formData: FormData) {
             .split(',')
             .map((t) => t.trim())
             .filter((t) => t.length > 0); // 空文字を除去
-        console.log('タグの処理');
 
         const validatedFields = schema.safeParse({
             text: text,
@@ -83,17 +86,16 @@ export async function addPostAction(prevState: any, formData: FormData) {
         // データベースへの保存
         try {
             console.log('データベースへの保存');
-            console.log('タグの配列');
-            console.log(tagNames);
             await prisma.post.create({
                 data: {
                     userId: userId,
                     content: text,
                     imageUrl: imageUrl,
                     isPublic: isPublic,
-                    // 位置情報: 数値に変換。取得できていない場合は一旦 0 などを入れるかエラーにする
-                    latitude: parseFloat(latStr) || 0,
-                    longitude: parseFloat(lngStr) || 0,
+                    latitude: latitude || 0,
+                    longitude: longitude || 0,
+                    temp: Number(temp) || null,
+                    weatherId: Number(weatherId) || null,
                     // タグのリレーション保存
                     tags: {
                         create: tagNames.map((name) => ({

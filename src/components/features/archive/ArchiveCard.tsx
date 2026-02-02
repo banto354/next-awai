@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Lock, Globe, Bookmark } from 'lucide-react';
+import { Lock, Globe } from 'lucide-react';
 import { TagList } from '@/components/ui/tagList';
-import { Entry } from '@/app/types/entry';
+import { ArchiveEntry } from '@/app/types/entry';
+import { getWeatherLabel } from '@/lib/weatherUtils';
 
 // プロパティの型定義
 interface ArchiveCardProps {
-  entry: Entry;
+  entry: ArchiveEntry;
 }
 
 export function ArchiveCard({ entry }: ArchiveCardProps) {
@@ -41,6 +42,8 @@ export function ArchiveCard({ entry }: ArchiveCardProps) {
               <div className="flex items-center gap-3 text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide">
                 <span>{entry.date}</span>
                 <span className="text-[#D4CFC3]">·</span>
+                <span>{entry.temperature} °C</span>
+                <span className="text-[#D4CFC3]">/</span>
                 <span>{entry.weather}</span>
               </div>
 
