@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Entry } from '@/app/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
+import { auth } from '@clerk/nextjs/server';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -12,6 +13,7 @@ interface PageProps {
 export default async function EntryPage({ params }: PageProps) {
   // 非同期でパラメータを取得
   const { id } = await params;
+  const { userId: currentUserID } = await auth();
 
   // 存在確認（存在しないIDなら404ページへ）
   const post = await prisma.post.findUnique({
@@ -32,6 +34,8 @@ export default async function EntryPage({ params }: PageProps) {
     notFound();
   }
 
+  const isAuthor = currentUserID === post.userId;
+
   const formattedEntry: Entry = {
     id: post.id,
     image: post.imageUrl || "",
@@ -51,7 +55,9 @@ export default async function EntryPage({ params }: PageProps) {
     }
   };
 
-  return <EntryDetailFeed entry={formattedEntry} />;
+  return <EntryDetailFeed
+    entry={formattedEntry}
+    isAuthor={isAuthor} />;
 }
 
 // 静的生成（SSG）用：あらかじめ存在するIDのページを作っておく設定
