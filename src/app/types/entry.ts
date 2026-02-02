@@ -13,6 +13,14 @@ export interface BaseEntry {
   isBookmarked?: boolean;
 }
 
+export interface Entry extends BaseEntry {
+  user: {
+    userName: string;
+    displayName: string;
+    userImage: string;
+  };
+}
+
 export interface ArchiveEntry extends BaseEntry {
 }
 

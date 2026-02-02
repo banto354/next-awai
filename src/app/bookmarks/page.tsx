@@ -2,7 +2,8 @@ import { BookmarksScreen } from "../../components/BookmarksScreen";
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { Entry } from '../types/entry';
+import { BookmarkEntry } from '../types/entry';
+import { getWeatherLabel } from '@/lib/weatherUtils';
 
 // 認証チェック
 const { userId } = await auth();
@@ -31,16 +32,17 @@ const bookmarks = await prisma.bookmark.findMany({
     },
 });
 
-const bookmarkedEntries: Entry[] = bookmarks.map((bookmark) => ({
+const bookmarkedEntries: BookmarkEntry[] = bookmarks.map((bookmark) => ({
     id: bookmark.post.id,
     image: bookmark.post.imageUrl || "",
     text: bookmark.post.content,
     date: bookmark.post.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    weather: "Rain", // 必要に応じてDBから取得
-    temperature: bookmark.post.temp ?? 0,
+    weatherId: bookmark.post.weatherId ?? 0,
+    weather: bookmark.post.weatherId ? getWeatherLabel(bookmark.post.weatherId) : "天気不明",
+    temperature: Math.round(bookmark.post.temp ?? 0),
     tags: bookmark.post.tags.map((t) => t.tag.name),
     isPublic: bookmark.post.isPublic,
-    isBookmarked: true, // ブックマークページなので true
+    isBookmarked: true,
     latitude: bookmark.post.latitude ?? 0,
     longitude: bookmark.post.longitude ?? 0,
     user: {

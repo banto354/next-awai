@@ -34,7 +34,7 @@ export default async function ArchivePage() {
         date: post.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }), // "Jan 11" のような形式に
         weather: post.weatherId ? getWeatherLabel(post.weatherId) : "天気不明",
         weatherId: post.weatherId ?? 0,
-        temperature: post.temp ?? 0, // nullの場合は0
+        temperature: Math.round(post.temp ?? 0), // nullの場合は0
         tags: post.tags.map((t) => t.tag.name), // タグオブジェクトから名前の配列へ
         isPublic: post.isPublic,
         latitude: post.latitude ?? 0,
