@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ArchiveScreen } from "../../components/ArchiveScreen";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Entry } from "../types/entry";
+import { ArchiveEntry } from "../types/entry";
 import { getWeatherLabel } from "@/lib/weatherUtils";
 
 export default async function ArchivePage() {
@@ -27,17 +27,16 @@ export default async function ArchivePage() {
             },
         },
     });
-    const formattedEntries: Entry[] = posts.map((post) => ({
+    const formattedEntries: ArchiveEntry[] = posts.map((post) => ({
         id: post.id,
         image: post.imageUrl || "", // nullの場合は空文字などでフォールバック
         text: post.content,
         date: post.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }), // "Jan 11" のような形式に
         weather: post.weatherId ? getWeatherLabel(post.weatherId) : "天気不明",
-        weatherId: post.weatherId,
+        weatherId: post.weatherId ?? 0,
         temperature: post.temp ?? 0, // nullの場合は0
         tags: post.tags.map((t) => t.tag.name), // タグオブジェクトから名前の配列へ
         isPublic: post.isPublic,
-        isBookmarked: false, // ※ブックマーク判定ロジックが必要なら別途実装
         latitude: post.latitude ?? 0,
         longitude: post.longitude ?? 0,
     }));

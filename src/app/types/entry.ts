@@ -14,7 +14,6 @@ export interface BaseEntry {
 }
 
 export interface ArchiveEntry extends BaseEntry {
-
 }
 
 export interface BookmarkEntry extends BaseEntry {
