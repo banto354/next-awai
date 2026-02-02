@@ -120,18 +120,9 @@ export function ComposeScreen() {
           <div className="flex items-center gap-2 text-[#A8A89E]">
             <CloudRain className="w-4 h-4" />
             {/* 気候情報取得要 */}
-            {/* 仮置き */}
             <span className="text-[13px] tracking-wide">{weather?.temp} / {weather?.description}</span>
           </div>
         </div>
-
-        {/* ロケーション */}
-        {/* 仮置き */}
-        {!post.locationAvailable && (
-          <div className="mt-4 text-[11px] text-[#9B9890] tracking-wide bg-gradient-to-r from-[#E8E6E0] to-transparent py-2 px-3 rounded-sm">
-            どこか
-          </div>
-        )}
       </div>
 
       {/* 画像アップロード */}

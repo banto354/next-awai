@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getWeatherLabel } from '@/lib/weatherUtils';
 
 type WeatherData = {
     temp: number;
@@ -35,7 +36,7 @@ export function useLocationWeather() {
                         setWeather({
                             temp: Math.round(data.temp),
                             weatherId: data.weatherId,
-                            description: data.main
+                            description: getWeatherLabel(data.weatherId)
                         });
                     }
                 } catch (error) {
