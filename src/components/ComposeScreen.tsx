@@ -13,21 +13,17 @@ interface PostState {
   text: string;
   isPublic: boolean;
   tags: string;
-  temp: number;
-  weather: string;
   // longitude: number;
   // latitude: number;
   locationAvailable: boolean;
 }
 
-// 初期値の設定ß
+// 初期値の設定
 const initialState: PostState = {
   image: null,
   text: '',
   isPublic: false,
   tags: '',
-  temp: 0,
-  weather: '',
   // longitude: 0,
   // latitude: 0,
   locationAvailable: true,
@@ -253,6 +249,9 @@ export function ComposeScreen() {
           <input type="hidden" name="locationAvailable" value={String(post.locationAvailable)} />
           <input type="hidden" name="latitude" value={location?.lat ?? ""} />
           <input type="hidden" name="longitude" value={location?.lng ?? ""} />
+          <input type="hidden" name="temp" value={weather?.temp ?? 0} />
+          <input type="hidden" name="weather" value={weather?.description ?? "天気不明"} />
+          <input type="hidden" name="weatherId" value={weather?.weatherId ?? 0} />
           <SubmitButton />
 
         </div>

@@ -92,7 +92,6 @@ export async function addPostAction(prevState: any, formData: FormData) {
                     content: text,
                     imageUrl: imageUrl,
                     isPublic: isPublic,
-                    // 位置情報: 数値に変換。取得できていない場合は一旦 0 などを入れるかエラーにする
                     latitude: latitude || 0,
                     longitude: longitude || 0,
                     temp: Number(temp) || null,
