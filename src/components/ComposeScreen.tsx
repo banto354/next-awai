@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { addPostAction } from '@/app/compose/action';
 import { useLocationWeather } from '@/hooks/useLocationWeather';
+import imageCompression from 'browser-image-compression';
 
 // 投稿データの形状を定義
 interface PostState {
@@ -57,16 +58,37 @@ export function ComposeScreen() {
   const { location, weather, loading } = useLocationWeather();
 
   // 画像のアップロード処理
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+
+    if (!file) return;
+
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    };
+    try {
+      const compressedBlob = await imageCompression(file, options);
+      const compressedFile = new File([compressedBlob], "compressed.jpg", {
+        type: compressedBlob.type,
+        lastModified: Date.now(),
+      });
+
       const reader = new FileReader();
       reader.onload = (event) => {
         setPost({ ...post, image: event.target?.result as string });
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressedFile);
+
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(compressedFile);
+      e.target.files = dataTransfer.files;
+    } catch (error) {
+      console.error('画像圧縮中にエラーが発生しました:', error);
     }
   };
+
   // タグ入力のキーボード操作
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // 変換中（IME使用中）はイベントを無視する
