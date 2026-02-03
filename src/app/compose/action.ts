@@ -129,3 +129,51 @@ export async function addPostAction(prevState: any, formData: FormData) {
     revalidatePath('/'); // タイムライン等を更新    
     redirect('/archive'); // トップページへ戻る
 }
+
+export async function deletePostAction(postId: string, imageUrl: string | null) {
+    //認証チェック
+    const { userId } = await auth();
+    if (!userId) {
+        return { success: false, error: "ログインしていません" };
+    }
+
+    try {
+        // 削除権限の確認 (自分の投稿かどうか)
+        const post = await prisma.post.findUnique({
+            where: { id: postId },
+            select: { userId: true },
+        });
+
+        if (!post) {
+            return { success: false, error: "投稿が見つかりません" };
+        }
+
+        if (post.userId !== userId) {
+            return { success: false, error: "削除権限がありません" };
+        }
+
+        // 画像があればSupabaseからも削除 (オプションだが推奨)
+        if (imageUrl) {
+            // URLからファイルパスを抽出 (例: .../post-image/user123/abc.jpg -> user123/abc.jpg)
+            const path = imageUrl.split('/post-image/').pop();
+            if (path) {
+                await supabase.storage
+                    .from('post-image')
+                    .remove([path]);
+            }
+        }
+
+        // DBから削除
+        await prisma.post.delete({
+            where: { id: postId },
+        });
+
+    } catch (error) {
+        console.error("Delete error:", error);
+        return { success: false, error: "削除に失敗しました" };
+    }
+
+    // 5. リダイレクト (削除後は一覧ページへ)
+    revalidatePath('/'); // キャッシュクリア
+    redirect('/archive'); // アーカイブへ
+}
