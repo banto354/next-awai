@@ -56,7 +56,7 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
             className="flex items-center gap-2 text-[#9B9890] hover:text-[#3D3D3A] transition-colors group"
           >
             <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            <h1 className="text-[13px] tracking-[0.15em] uppercase">Entry</h1>
+            <h1 className="text-[13px] tracking-[0.15em] uppercase">一覧へ</h1>
           </button>
         </div>
       </div>
@@ -117,7 +117,7 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
 
-                    <AlertDialogFooter className="mt-6 gap-3 sm:gap-0">
+                    <AlertDialogFooter className="mt-6 gap-3 sm:gap-2">
                       {/* キャンセルボタン: 背景透明、枠線あり、文字はグレー */}
                       <AlertDialogCancel
                         className="border-[#D4CFC3] text-[#9B9890] hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50 bg-transparent text-[13px] tracking-wide h-10 px-6 rounded-sm transition-colors"
