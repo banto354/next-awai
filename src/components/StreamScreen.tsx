@@ -1,22 +1,78 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { mockEntries } from '@/app/data/mockEntries';
+import { getStreamPostsAction } from '@/app/stream/action';
+import { StreamEntry } from '@/app/types/entry';
+
+// 初期状態（ローディング中など）
+const LOADING_ENTRY: StreamEntry = {
+  id: 'loading',
+  text: 'Loading nearby thoughts...',
+  image: '/images/placeholder.png',
+  date: '',
+  weather: '',
+  weatherId: 0,
+  temperature: 0,
+  tags: [],
+  isPublic: true,
+  latitude: 0,
+  longitude: 0,
+  user: { userName: '', displayName: '', userImage: '' }
+};
 
 export function StreamScreen() {
+  const [entries, setEntries] = useState<StreamEntry[]>([LOADING_ENTRY]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   // モック
-  const currentEntry = mockEntries[currentIndex];
+  // const currentEntry = mockEntries[currentIndex];
+
+  // 位置情報を取得して投稿をロードする関数
+  const loadStream = async () => {
+    setLoading(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        });
+      });
+
+      const posts = await getStreamPostsAction(position.coords.latitude, position.coords.longitude);
+      if (posts.length > 0) {
+        setEntries(posts);
+      } else {
+        // データがない場合はフォールバック（モック or 全体ランダム）
+        setEntries([]);
+      }
+    } catch (error) {
+      console.warn("Geolocation failed, using mock data", error);
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 初回ロード
+  useEffect(() => {
+    loadStream();
+  }, []);
+
+  const currentEntry = entries.length > 0 ? entries[currentIndex] : LOADING_ENTRY;
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % mockEntries.length);
+    if (entries.length === 0) return;
+    setCurrentIndex((prev) => (prev + 1) % entries.length);
   };
 
   const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + mockEntries.length) % mockEntries.length);
+    if (entries.length === 0) return;
+    setCurrentIndex((prev) => (prev - 1 + entries.length) % entries.length);
   };
 
   const toggleBookmark = () => {
@@ -32,6 +88,19 @@ export function StreamScreen() {
   };
 
   const isBookmarked = bookmarkedIds.has(currentEntry.id);
+
+  if (loading && entries.length === 0) {
+    return <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8] text-[#9B9890]">
+      Loading...
+    </div>;
+  }
+
+  // データが0件の場合の表示
+  if (!loading && entries.length === 0) {
+    return <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8] text-[#9B9890]">
+      まだ公開された投稿がありません。
+    </div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAFAF8]">
@@ -60,6 +129,13 @@ export function StreamScreen() {
               // 画面の主役となる画像なので、優先的に読み込む設定
               priority
             />
+            {/* ユーザーバッジの追加 */}
+            <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
+              {/* ユーザーアイコンがあれば表示、なければイニシャルなど */}
+              <span className="text-[11px] text-[#3D3D3A] font-medium">
+                @{currentEntry.user.displayName}
+              </span>
+            </div>
           </div>
 
           {/* メタデータ */}
