@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { mockEntries } from '@/app/data/mockEntries';
 import { getStreamPostsAction } from '@/app/stream/action';
 import { StreamEntry } from '@/app/types/entry';
+import { getWeatherLabel } from '@/lib/weatherUtils';
 
 // 初期状態（ローディング中など）
 const LOADING_ENTRY: StreamEntry = {
@@ -91,7 +92,7 @@ export function StreamScreen() {
 
   if (loading && entries.length === 0) {
     return <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8] text-[#9B9890]">
-      Loading...
+      読み込み中...
     </div>;
   }
 
@@ -107,9 +108,11 @@ export function StreamScreen() {
       {/* ヘッダー */}
       <div className="px-6 pt-12 pb-8 lg:px-16 lg:pt-16 lg:pb-12">
         <div className="flex items-center justify-between lg:max-w-4xl lg:mx-auto">
-          <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">Stream</h1>
+          <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">
+            Stream
+          </h1>
           <div className="text-[11px] text-[#9B9890] tracking-wider">
-            {currentIndex + 1} of {mockEntries.length}
+            {currentIndex + 1} of {entries.length}
           </div>
         </div>
       </div>
@@ -117,36 +120,62 @@ export function StreamScreen() {
       {/* 画像コンテンツ - Zen Mode with Generous Gutters */}
       <div className="flex-1 px-6 pb-8 flex flex-col gap-8 lg:px-16 lg:pb-16">
         <div className="lg:max-w-4xl lg:mx-auto w-full">
-          {/* 画像 */}
-          <div className="relative w-full aspect-[16/10] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
-            <Image
-              src={currentEntry.image}
-              alt="Memory"
-              fill
-              className="object-cover"
-              // ブラウザに適切な画像サイズを選択させるための設定
-              sizes="(max-width: 1024px) 100vw, 80vw"
-              // 画面の主役となる画像なので、優先的に読み込む設定
-              priority
-            />
-            {/* ユーザーバッジの追加 */}
-            <div className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
-              {/* ユーザーアイコンがあれば表示、なければイニシャルなど */}
-              <span className="text-[11px] text-[#3D3D3A] font-medium">
-                @{currentEntry.user.displayName}
+
+          {/* Image Area */}
+          <div className="relative w-full aspect-[4/5] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
+            {currentEntry.image ? (
+              <Image
+                src={currentEntry.image}
+                alt="Memory"
+                fill
+                className="object-cover"
+                // ブラウザに適切な画像サイズを選択させるための設定
+                sizes="(max-width: 1024px) 100vw, 80vw"
+                // 画面の主役となる画像なので、優先的に読み込む設定
+                priority
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-[#F5F4F0]">
+                <span className="text-[#D4CFC3] text-xs tracking-widest">NO IMAGE</span>
+              </div>
+            )}
+          </div>
+
+          {/* Metadata Row (User Left / Date Right) */}
+          <div className="flex items-center justify-between mt-8 lg:mt-12 lg:px-4">
+
+            {/* Left: User Info */}
+            <div className="flex items-center gap-2">
+              {/* Avatar */}
+              <div className="relative w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
+                {currentEntry.user.userImage ? (
+                  <Image
+                    src={currentEntry.user.userImage}
+                    alt={currentEntry.user.displayName}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#D4CFC3]" />
+                )}
+              </div>
+              {/* Name */}
+              <span className="text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide font-normal">
+                {currentEntry.user.displayName}
               </span>
+            </div>
+
+            {/* Right: Date & Weather */}
+            <div className="flex items-center gap-3 text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide">
+              <span>{currentEntry.date}</span>
+              <span className="text-[#D4CFC3]">·</span>
+              <span>{currentEntry.weather}</span>
             </div>
           </div>
 
-          {/* メタデータ */}
-          <div className="flex items-center justify-between text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide mt-8 lg:mt-12 lg:px-4">
-            <span>{currentEntry.date}</span>
-            <span>{currentEntry.weather}</span>
-          </div>
-
-          {/* テキストコンテンツ - Desktop: More generous spacing */}
+          {/* Text Content */}
           <div className="flex-1 space-y-6 lg:space-y-10 mt-8 lg:mt-12 lg:px-4">
-            <p className="text-[15px] lg:text-[18px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl" style={{ fontWeight: 400 }}>
+            <p className="text-[15px] lg:text-[18px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl font-normal whitespace-pre-wrap">
               {currentEntry.text}
             </p>
 
@@ -156,8 +185,7 @@ export function StreamScreen() {
                 {currentEntry.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[12px] tracking-wider rounded-full transition-colors hover:bg-[#D4CFC3]/30"
-                    style={{ fontWeight: 400 }}
+                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[12px] tracking-wider rounded-full"
                   >
                     {tag}
                   </span>
@@ -165,9 +193,9 @@ export function StreamScreen() {
               </div>
             )}
           </div>
+
         </div>
       </div>
-
       {/* ナビゲーションコントロール　*/}
       <div className="px-6 pb-8 flex items-center justify-between lg:justify-center lg:gap-32 lg:pb-12 lg:max-w-4xl lg:mx-auto lg:w-full">
         <button
