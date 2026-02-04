@@ -377,6 +377,7 @@ export function ComposeScreen() {
                 restrictPosition={true}
                 objectFit="contain"
                 minZoom={0.8}
+                zoomSpeed={1}
               />
             )}
           </div>
@@ -387,7 +388,7 @@ export function ComposeScreen() {
               <span className="text-xs text-[#9B9890]">Zoom</span>
               <Slider
                 value={[zoom]}
-                min={1} max={3} step={0.1}
+                min={1} max={4} step={0.1}
                 onValueChange={(val) => setZoom(val[0])}
                 className="flex-1"
               />
