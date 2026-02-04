@@ -141,13 +141,13 @@ export function StreamScreen() {
             )}
           </div>
 
-          {/* Metadata Row (User Left / Date Right) */}
+          {/* メタデータ行 (ユーザー左 / 日付右) */}
           <div className="flex items-center justify-between mt-8 lg:mt-12 lg:px-4">
 
-            {/* Left: User Info */}
-            <div className="flex items-center gap-2">
-              {/* Avatar */}
-              <div className="relative w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
+            {/* 左: ユーザー情報 */}
+            <div className="flex items-center gap-3">
+              {/* アバター */}
+              <div className="relative w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
                 {currentEntry.user.userImage ? (
                   <Image
                     src={currentEntry.user.userImage}
@@ -159,21 +159,21 @@ export function StreamScreen() {
                   <div className="w-full h-full bg-[#D4CFC3]" />
                 )}
               </div>
-              {/* Name */}
-              <span className="text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide font-normal">
+              {/* ユーザー名 */}
+              <span className="text-[13px] lg:text-[14px] text-[#9B9890] tracking-wide font-normal">
                 {currentEntry.user.displayName}
               </span>
             </div>
 
-            {/* Right: Date & Weather */}
-            <div className="flex items-center gap-3 text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide">
+            {/* 右: 日付と天気 */}
+            <div className="flex items-center gap-3 text-[13px] lg:text-[14px] text-[#9B9890] tracking-wide">
               <span>{currentEntry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
-              <span>{currentEntry.weather}</span>
+              <span>{currentEntry.temperature}°C / {currentEntry.weather}</span>
             </div>
           </div>
 
-          {/* Text Content */}
+          {/* テキスト */}
           <div className="flex-1 space-y-6 lg:space-y-10 mt-8 lg:mt-12 lg:px-4">
             <p className="text-[15px] lg:text-[18px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl font-normal whitespace-pre-wrap">
               {currentEntry.text}

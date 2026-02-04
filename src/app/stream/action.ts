@@ -81,11 +81,11 @@ export async function getStreamPostsAction(
             image: post.image_url || '',
             text: post.content,
             date: new Date(post.created_at).toLocaleDateString('en-US', {
-                month: 'long',
+                month: 'short',
                 day: 'numeric',
                 year: 'numeric',
             }),
-            weather: getWeatherLabel(post.weather_id) + (post.temp ? ` / ${Math.round(post.temp)}°C` : ''),
+            weather: getWeatherLabel(post.weather_id),
             weatherId: post.weather_id,
             temperature: post.temp,
             tags: post.tags_json || [],
