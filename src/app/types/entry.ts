@@ -31,3 +31,11 @@ export interface BookmarkEntry extends BaseEntry {
     userImage: string;
   };
 }
+
+export interface StreamEntry extends Entry {
+  user: {
+    userName: string;
+    displayName: string;
+    userImage: string;
+  };
+}

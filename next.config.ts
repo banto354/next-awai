@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/storage/v1/object/public/**', // Supabaseストレージのパス規則
       },
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com', // Clerkの画像ドメインを許可
+      },
     ],
   },
 };
