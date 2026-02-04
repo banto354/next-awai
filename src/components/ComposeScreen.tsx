@@ -21,6 +21,7 @@ interface PostState {
   // longitude: number;
   // latitude: number;
   locationAvailable: boolean;
+  file: File | null;
 }
 
 // 初期値の設定
@@ -32,6 +33,7 @@ const initialState: PostState = {
   // longitude: 0,
   // latitude: 0,
   locationAvailable: true,
+  file: null,
 };
 
 function SubmitButton() {
@@ -67,41 +69,6 @@ export function ComposeScreen() {
   const [tempImgSrc, setTempImgSrc] = useState<string | null>(null); // 一時的に切り抜いた画像
   const [isCropOpen, setIsCropOpen] = useState(false); // トリミングが開いているかどうか
 
-  // 画像のアップロード処理
-  // const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-
-  //   if (!file) return;
-  //   // 圧縮設定
-  //   const options = {
-  //     maxSizeMB: 1,
-  //     maxWidthOrHeight: 1920,
-  //     useWebWorker: true,
-  //   };
-  //   try {
-  //     // 圧縮処理
-  //     const compressedBlob = await imageCompression(file, options);
-  //     // BlobファイルをFileオブジェクトに変換
-  //     const compressedFile = new File([compressedBlob], "compressed.jpg", {
-  //       type: compressedBlob.type,
-  //       lastModified: Date.now(),
-  //     });
-  //     // 画像表示用のURLを生成
-  //     const reader = new FileReader();
-  //     reader.onload = (event) => {
-  //       setPost({ ...post, image: event.target?.result as string });
-  //     };
-  //     reader.readAsDataURL(compressedFile);
-
-  //     // 元のファイルを置き換える
-  //     const dataTransfer = new DataTransfer();
-  //     dataTransfer.items.add(compressedFile);
-  //     e.target.files = dataTransfer.files;
-  //   } catch (error) {
-  //     console.error('画像圧縮中にエラーが発生しました:', error);
-  //   }
-  // };
-
   // ファイル選択時の処理（まずはトリミング画面を開く）
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -129,14 +96,14 @@ export function ComposeScreen() {
     if (!tempImgSrc || !croppedAreaPixels) return;
 
     try {
-      // A. トリミング実行 (Blobを取得)
+      // トリミング実行 (Blobを取得)
       const croppedBlob = await getCroppedImg(tempImgSrc, croppedAreaPixels);
       if (!croppedBlob) return;
 
       // BlobをFileオブジェクトに変換
       const croppedFile = new File([croppedBlob], "cropped.jpg", { type: "image/jpeg" });
 
-      // B. 圧縮実行 
+      // 圧縮実行 
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1920,
@@ -147,22 +114,21 @@ export function ComposeScreen() {
         type: compressedBlob.type,
         lastModified: Date.now(),
       });
-      // C. プレビュー表示更新 & 送信データ準備
-      const reader = new FileReader();
-      reader.readAsDataURL(compressedFile);
-      reader.onload = (event) => {
-        setPost(prev => ({ ...prev, image: event.target?.result as string }));
-      };
+      // プレビュー表示用のURL生成をPromiseでラップ
+      const previewUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(compressedFile);
+        reader.onload = (event) => {
+          resolve(event.target?.result as string);
+        };
+      })
+      // プレビュー表示更新
+      setPost(prev => ({
+        ...prev,
+        image: previewUrl,
+        file: compressedFile
+      }));
 
-      // D. inputタグの中身を差し替え (DataTransferを使用)
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(compressedFile);
-
-      // input要素を探して差し替え
-      const fileInput = document.getElementById('image-upload') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.files = dataTransfer.files;
-      }
       setIsCropOpen(false); // モーダル閉じる
     } catch (e) {
       console.error(e);
@@ -206,6 +172,22 @@ export function ComposeScreen() {
     setTagList(newTags);
     setPost({ ...post, tags: newTags.join(',') });
   };
+
+  useEffect(() => {
+    if (post.file) {
+      // inputタグを探す
+      const fileInput = document.getElementById('image-upload') as HTMLInputElement;
+
+      if (fileInput) {
+        // DataTransferを使ってファイルをセット可能な形式にする
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(post.file);
+
+        // 3. inputタグにファイルを復元！
+        fileInput.files = dataTransfer.files;
+      }
+    }
+  }, [post.file, formState]); // ファイルが変わった時や、エラーが出た時(formState)に実行
 
   return (
     <>
@@ -391,7 +373,10 @@ export function ComposeScreen() {
                 onCropChange={setCrop}
                 onCropComplete={onCropComplete}
                 onZoomChange={setZoom}
-                showGrid={false} // お好みで
+                showGrid={true} // お好みで
+                restrictPosition={true}
+                objectFit="contain"
+                minZoom={0.8}
               />
             )}
           </div>
@@ -407,7 +392,7 @@ export function ComposeScreen() {
                 className="flex-1"
               />
             </div>
-            <DialogFooter className="flex-row gap-2 sm:gap-0">
+            <DialogFooter className="flex-row gap-2 sm:gap-2">
               <button
                 onClick={() => setIsCropOpen(false)}
                 className="flex-1 py-2 text-[#9B9890] text-sm border border-[#D4CFC3] rounded-sm"
