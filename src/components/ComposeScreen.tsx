@@ -1,16 +1,21 @@
 "use client";
 
-import { useActionState, useState, useEffect, useCallback } from 'react';
+import { useActionState, useState, useEffect, useCallback, useMemo } from 'react';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/lib/cropImage';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import { ImagePlus, CloudRain, Lock, Globe, X } from 'lucide-react';
+import { ImagePlus, CloudRain, Lock, Globe, X, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { addPostAction } from '@/app/compose/action';
 import { useLocationWeather } from '@/hooks/useLocationWeather';
 import imageCompression from 'browser-image-compression';
+
+// バリデーション定数（action.tsと同期）
+const MAX_TEXT_LENGTH = 50;
+const MAX_TAG_COUNT = 5;
+const MAX_TAG_LENGTH = 10;
 
 // 投稿データの形状を定義
 interface PostState {
@@ -68,6 +73,28 @@ export function ComposeScreen() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null); // 切り抜き範囲(pixel)
   const [tempImgSrc, setTempImgSrc] = useState<string | null>(null); // 一時的に切り抜いた画像
   const [isCropOpen, setIsCropOpen] = useState(false); // トリミングが開いているかどうか
+
+  // バリデーション警告を計算
+  const validationWarnings = useMemo(() => {
+    const warnings: { text?: string; tags?: string; tagInput?: string } = {};
+
+    // テキスト長チェック
+    if (post.text.length > MAX_TEXT_LENGTH) {
+      warnings.text = `テキストは${MAX_TEXT_LENGTH}文字以内にしてください（現在${post.text.length}文字）`;
+    }
+
+    // タグ数チェック
+    if (tagList.length >= MAX_TAG_COUNT) {
+      warnings.tags = `タグは${MAX_TAG_COUNT}個以内にしてください（現在${tagList.length}個）`;
+    }
+
+    // タグ入力中の長さチェック
+    if (tagInput.length > MAX_TAG_LENGTH) {
+      warnings.tagInput = `タグは${MAX_TAG_LENGTH}文字以内にしてください（現在${tagInput.length}文字）`;
+    }
+
+    return warnings;
+  }, [post.text, tagList.length, tagInput]);
 
   // ファイル選択時の処理（まずはトリミング画面を開く）
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,6 +172,13 @@ export function ComposeScreen() {
       e.preventDefault(); // フォーム送信を防ぐ
 
       const newTag = tagInput.trim();
+      // バリデーションチェック
+      if (newTag.length > MAX_TAG_LENGTH) {
+        return; // 長すぎるタグは追加しない
+      }
+      if (tagList.length >= MAX_TAG_COUNT) {
+        return; // タグ数上限
+      }
       // 重複チェックと空文字チェック
       if (newTag && !tagList.includes(newTag)) {
         const newTags = [...tagList, newTag];
@@ -152,8 +186,6 @@ export function ComposeScreen() {
         setPost({ ...post, tags: newTags.join(',') });
         setTagInput("");
       }
-      console.log('taglist', tagList);
-      console.log('tags', post.tags);
     }
   };
   const handleTagBlur = () => {
@@ -264,10 +296,17 @@ export function ComposeScreen() {
               value={post.text}
               onChange={(e) => setPost({ ...post, text: e.target.value })}
               placeholder="今考えていることを書き留めましょう..."
-              className="w-full h-32 lg:h-48 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[17px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide"
+              className={`w-full h-32 lg:h-48 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[17px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide ${validationWarnings.text ? 'text-red-800/80' : ''}`}
               style={{ fontWeight: 400 }}
               name="text"
             />
+            {/* テキストバリデーション警告 */}
+            {validationWarnings.text && (
+              <div className="flex items-center gap-1.5 text-red-500 text-[11px] lg:text-[12px] mt-1 animate-fadeIn">
+                <AlertCircle className="w-3.5 h-3.5" strokeWidth={2} />
+                <span>{validationWarnings.text}</span>
+              </div>
+            )}
 
             {/* タグ */}
             <div className="space-y-2 lg:space-y-3">
@@ -301,6 +340,13 @@ export function ComposeScreen() {
                   </button>
                 ))}
               </div>
+              {/* タグバリデーション警告 */}
+              {(validationWarnings.tags || validationWarnings.tagInput) && (
+                <div className="flex items-center gap-1.5 text-red-500 text-[11px] lg:text-[12px] mt-1 animate-fadeIn">
+                  <AlertCircle className="w-3.5 h-3.5" strokeWidth={2} />
+                  <span>{validationWarnings.tagInput || validationWarnings.tags}</span>
+                </div>
+              )}
               {/* サーバー送信用の隠しフィールド */}
               <input type="hidden" name="tags" value={post.tags} />
 
