@@ -16,7 +16,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"; // コンポーネントのパスは環境に合わせて調整してください
-import { deletePostAction } from '@/app/compose/action'; // Actionをインポート
+import { deletePostAction } from '@/app/compose/action';
+import { toggleBookmarkAction } from '@/app/bookmarks/action';
 
 interface EntryDetailFeedProps {
   entry: Entry;
@@ -31,9 +32,14 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
   const [isBookmarked, setIsBookmarked] = useState(entry.isBookmarked);
 
   const toggleBookmark = () => {
+    const previousState = isBookmarked;
     setIsBookmarked(!isBookmarked);
-    // TODO: ここで Server Action を呼んでDB更新を行う
-
+    startTransition(async () => {
+      const result = await toggleBookmarkAction(entry.id);
+      if (!result.success) {
+        setIsBookmarked(previousState);
+      }
+    });
   };
 
   const handleDelete = () => {

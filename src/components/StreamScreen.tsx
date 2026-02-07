@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { mockEntries } from '@/app/data/mockEntries';
 import { getStreamPostsAction } from '@/app/stream/action';
+import { toggleBookmarkAction } from '@/app/bookmarks/action';
 import { StreamEntry } from '@/app/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
 
@@ -29,8 +30,7 @@ export function StreamScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
-  // モック
-  // const currentEntry = mockEntries[currentIndex];
+  const [, startTransition] = useTransition();
 
   // 位置情報を取得して投稿をロードする関数
   const loadStream = async () => {
@@ -47,6 +47,10 @@ export function StreamScreen() {
       const posts = await getStreamPostsAction(position.coords.latitude, position.coords.longitude);
       if (posts.length > 0) {
         setEntries(posts);
+        const initialBookmarks = new Set(
+          posts.filter((p) => p.isBookmarked).map((p) => p.id)
+        );
+        setBookmarkedIds(initialBookmarks);
       } else {
         // データがない場合はフォールバック（モック or 全体ランダム）
         setEntries([]);
@@ -77,6 +81,7 @@ export function StreamScreen() {
   };
 
   const toggleBookmark = () => {
+    const previousBookmarked = bookmarkedIds.has(currentEntry.id);
     setBookmarkedIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(currentEntry.id)) {
@@ -85,6 +90,21 @@ export function StreamScreen() {
         newSet.add(currentEntry.id);
       }
       return newSet;
+    });
+    startTransition(async () => {
+      const result = await toggleBookmarkAction(currentEntry.id);
+      if (!result.success) {
+        // ロールバック
+        setBookmarkedIds((prev) => {
+          const newSet = new Set(prev);
+          if (previousBookmarked) {
+            newSet.add(currentEntry.id);
+          } else {
+            newSet.delete(currentEntry.id);
+          }
+          return newSet;
+        });
+      }
     });
   };
 
