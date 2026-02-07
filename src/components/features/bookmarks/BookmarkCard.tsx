@@ -54,9 +54,7 @@ export function BookmarkCard({ entry }: BookmarkCardProps) {
             <div className="flex items-center gap-3 text-[11px] lg:text-[13px] text-[#9B9890] tracking-wide">
               <span>{entry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
-              <span>{entry.temperature} °C</span>
-              <span className="text-[#D4CFC3]">/</span>
-              <span>{getWeatherLabel(entry.weatherId)}</span>
+              <span>{entry.temperature}°C / {getWeatherLabel(entry.weatherId)}</span>
             </div>
 
             {/* Privacy Icon */}

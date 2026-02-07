@@ -92,47 +92,39 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
             )}
           </div>
 
-          {/* メタデータ行 (ユーザー左 / 日付・アクション右) */}
-          <div className="flex items-center justify-between mt-8 lg:mt-12 lg:px-4">
+          {/* テキストコンテンツ */}
+          <div className="mt-6 lg:mt-8 lg:px-4">
+            <p
+              className="text-[15px] lg:text-[20px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl"
+              style={{ fontWeight: 400 }}
+            >
+              {entry.text}
+            </p>
+          </div>
 
-            {/* 左: ユーザー情報 */}
-            <div className="flex items-center gap-3">
-              <div className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
-                {entry.user.userImage ? (
-                  <Image
-                    src={entry.user.userImage}
-                    alt={entry.user.displayName}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-[#D4CFC3]" />
-                )}
-              </div>
-              <span className="text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide font-normal">
-                {entry.user.displayName}
-              </span>
-            </div>
-
-            {/* 右: 日付・天気・アクションボタン */}
+          {/* メタデータ (日付・天気・気温) + アイコン */}
+          <div className="flex items-center justify-between mt-6 lg:mt-8 lg:px-4">
+            {/* 左: 日付・天気・気温 */}
             <div className="flex items-center gap-3 text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide">
               <span>{entry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
               <span>{entry.temperature}°C / {entry.weather}</span>
-              <span className="text-[#D4CFC3]">·</span>
+            </div>
+
+            {/* 右: アイコン */}
+            <div className="flex items-center gap-3">
               {/* 削除ボタン (所有者のみ表示) */}
               {isAuthor && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <button
-                      className="transition-all hover:scale-110 text-[#A8A89E] hover:text-[#C5A088]" // ホバー時に警告色（Soft Clay）に
+                      className="transition-all hover:scale-110 text-[#A8A89E] hover:text-[#C5A088]"
                       aria-label="Delete entry"
                     >
                       <Trash2 className="w-5 h-5" strokeWidth={1.5} />
                     </button>
                   </AlertDialogTrigger>
 
-                  {/* ダイアログ本体: 背景色をAWAIのペーパーカラー(#FAFAF8)に合わせ、枠線をアクセントカラーに */}
                   <AlertDialogContent className="bg-[#FAFAF8] border-[#D4CFC3] shadow-md p-8 sm:rounded-sm max-w-[400px]">
                     <AlertDialogHeader className="space-y-3">
                       <AlertDialogTitle className="text-[#3D3D3A] tracking-wider text-[16px] font-medium">
@@ -145,7 +137,6 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
                     </AlertDialogHeader>
 
                     <AlertDialogFooter className="mt-6 gap-3 sm:gap-2">
-                      {/* キャンセルボタン: 背景透明、枠線あり、文字はグレー */}
                       <AlertDialogCancel
                         className="border-[#D4CFC3] text-[#9B9890] hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50 bg-transparent text-[13px] tracking-[0.08em] h-10 px-6 rounded-sm transition-all"
                         style={{ fontWeight: 400 }}
@@ -153,7 +144,6 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
                         キャンセル
                       </AlertDialogCancel>
 
-                      {/* 削除ボタン: AWAIのDestructiveカラー(#C5A088)を使用 */}
                       <AlertDialogAction
                         onClick={handleDelete}
                         disabled={isPending}
@@ -166,7 +156,7 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
                   </AlertDialogContent>
                 </AlertDialog>
               )}
-              {/* ブックマークボタン (メタデータ列に配置) */}
+              {/* ブックマークボタン */}
               <button
                 onClick={toggleBookmark}
                 className="transition-all hover:scale-110"
@@ -182,29 +172,38 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
             </div>
           </div>
 
-          {/* テキストコンテンツ */}
-          <div className="flex-1 space-y-6 lg:space-y-10 mt-8 lg:mt-12 lg:px-4">
-            <p
-              className="text-[15px] lg:text-[20px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl"
-              style={{ fontWeight: 400 }}
-            >
-              {entry.text}
-            </p>
+          {/* タグ */}
+          {entry.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 lg:gap-3 mt-4 lg:mt-6 lg:px-4">
+              {entry.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[13px] tracking-wider rounded-full transition-colors hover:bg-[#D4CFC3]/30"
+                  style={{ fontWeight: 400 }}
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
 
-            {/* タグ */}
-            {entry.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 lg:gap-3">
-                {entry.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[13px] tracking-wider rounded-full transition-colors hover:bg-[#D4CFC3]/30"
-                    style={{ fontWeight: 400 }}
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
+          {/* ユーザー情報 */}
+          <div className="flex items-center gap-3 mt-6 lg:mt-8 lg:px-4">
+            <div className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
+              {entry.user.userImage ? (
+                <Image
+                  src={entry.user.userImage}
+                  alt={entry.user.displayName}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-[#D4CFC3]" />
+              )}
+            </div>
+            <span className="text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide font-normal">
+              {entry.user.displayName}
+            </span>
           </div>
         </div>
       </div>

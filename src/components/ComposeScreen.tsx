@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useEffect, useCallback, useMemo } from 'react';
+import { useActionState, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/lib/cropImage';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -74,6 +74,41 @@ export function ComposeScreen() {
   const [tempImgSrc, setTempImgSrc] = useState<string | null>(null); // 一時的に切り抜いた画像
   const [isCropOpen, setIsCropOpen] = useState(false); // トリミングが開いているかどうか
   const [showError, setShowError] = useState(false); // エラー表示のタイマー管理用
+
+  // デスクトップ用：画像の下端と右パネルの下端を揃えるためのref
+  const imageRef = useRef<HTMLLabelElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const [rightPadTop, setRightPadTop] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    const sync = () => {
+      const img = imageRef.current;
+      const panel = rightPanelRef.current;
+      if (!img || !panel || window.innerWidth < 1024) {
+        setRightPadTop(undefined);
+        return;
+      }
+      const imageBottom = img.getBoundingClientRect().bottom;
+      const panelRect = panel.getBoundingClientRect();
+      // 右パネル内のコンテンツの自然な高さを取得（paddingTopを除く）
+      const currentPadTop = parseFloat(getComputedStyle(panel).paddingTop);
+      const contentHeight = panel.scrollHeight - currentPadTop;
+      // コンテンツの下端が画像の下端に揃うようにpaddingTopを算出
+      const desiredTop = imageBottom - contentHeight;
+      const newPad = Math.max(16, desiredTop - panelRect.top);
+      setRightPadTop(newPad);
+    };
+
+    sync();
+    const ro = new ResizeObserver(sync);
+    if (imageRef.current) ro.observe(imageRef.current);
+    if (rightPanelRef.current) ro.observe(rightPanelRef.current);
+    window.addEventListener('resize', sync);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', sync);
+    };
+  }, []);
 
   // エラー表示のタイマー（3秒後に自動消去）
   useEffect(() => {
@@ -267,6 +302,7 @@ export function ComposeScreen() {
           </div>
 
           <label
+            ref={imageRef}
             htmlFor="image-upload"
             className="block w-full aspect-[16/10] bg-[#F5F4F0] border border-[#D4CFC3]/20 rounded-sm cursor-pointer transition-all hover:bg-[#E8E6E0]/30 hover:border-[#D4CFC3]/40 relative overflow-hidden lg:shadow-sm"
           >
@@ -306,9 +342,11 @@ export function ComposeScreen() {
         <div className="h-px bg-[#D4CFC3]/10 mx-6 lg:hidden" />
 
         {/* テキストエリア */}
-        <div className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:justify-center lg:bg-[#F9F8F5]">
-          {/* 左パネルのヘッダー分の高さを確保し、画像の下端と揃える */}
-          <div className="hidden lg:block h-14" aria-hidden="true" />
+        <div
+          ref={rightPanelRef}
+          className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:bg-[#F9F8F5]"
+          style={rightPadTop != null ? { paddingTop: rightPadTop } : undefined}
+        >
           <div className="flex-1 lg:flex-initial lg:space-y-4">
             <textarea
               value={post.text}

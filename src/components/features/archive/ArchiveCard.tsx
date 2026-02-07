@@ -51,9 +51,7 @@ export function ArchiveCard({ entry, onTagClick }: ArchiveCardProps) {
               <div className="flex items-center gap-3 text-[11px] lg:text-[13px] text-[#9B9890] tracking-wide">
                 <span>{entry.date}</span>
                 <span className="text-[#D4CFC3]">·</span>
-                <span>{entry.temperature} °C</span>
-                <span className="text-[#D4CFC3]">/</span>
-                <span>{entry.weather}</span>
+                <span>{entry.temperature}°C / {entry.weather}</span>
               </div>
 
               <div className="text-[#A8A89E]">
@@ -66,7 +64,9 @@ export function ArchiveCard({ entry, onTagClick }: ArchiveCardProps) {
             </div>
 
             {/* タグ */}
-            <TagList tags={entry.tags} onTagClick={onTagClick} />
+            <div className="mt-2 lg:mt-0">
+              <TagList tags={entry.tags} onTagClick={onTagClick} />
+            </div>
           </div>
         </div>
       </div>
