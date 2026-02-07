@@ -95,9 +95,13 @@ export function ComposeScreen() {
       warnings.text = `テキストは${MAX_TEXT_LENGTH}文字以内にしてください（現在${post.text.length}文字）`;
     }
 
-    // タグ数チェック
-    if (tagList.length >= MAX_TAG_COUNT) {
+    // タグ数チェック（上限を超えた場合のみ警告）
+    if (tagList.length > MAX_TAG_COUNT) {
       warnings.tags = `タグは${MAX_TAG_COUNT}個以内にしてください（現在${tagList.length}個）`;
+    }
+    // 上限に達した状態で新しいタグを入力しようとしている場合
+    else if (tagList.length >= MAX_TAG_COUNT && tagInput.trim().length > 0) {
+      warnings.tags = `タグは${MAX_TAG_COUNT}個までです。これ以上追加できません`;
     }
 
     // タグ入力中の長さチェック
@@ -401,8 +405,8 @@ export function ComposeScreen() {
       {/* エラートースト（formの外に配置してfixedが正しく動作するように） */}
       <div
         className={`fixed bottom-28 left-4 right-4 z-[100] bg-red-50/95 backdrop-blur-md border border-red-100 px-4 py-3 rounded-lg shadow-lg lg:bottom-10 lg:left-auto lg:right-10 lg:w-auto lg:min-w-[300px] transition-all duration-300 ${formState.error && showError
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 translate-y-2 pointer-events-none'
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-2 pointer-events-none'
           }`}
       >
         <div className="flex items-center justify-center gap-2">
