@@ -10,10 +10,14 @@ const isPublicRoute = createRouteMatcher([
   '/', // もしトップページも未ログインで見せたい場合
 ]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
   // 2. 公開ルート「以外」へのアクセスで、かつ未ログインなら保護する
   if (!isPublicRoute(req)) {
-    auth.protect();
+    // 絶対URLを構築（Next.jsミドルウェアでは相対URLが使えないため）
+    const origin = req.nextUrl.origin;
+    await auth.protect({
+      unauthenticatedUrl: `${origin}/`, // 未ログイン時はLandingページへリダイレクト
+    });
   }
 });
 
