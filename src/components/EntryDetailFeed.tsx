@@ -109,13 +109,13 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
                   <div className="w-full h-full bg-[#D4CFC3]" />
                 )}
               </div>
-              <span className="text-[13px] lg:text-[14px] text-[#9B9890] tracking-wide font-normal">
+              <span className="text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide font-normal">
                 {entry.user.displayName}
               </span>
             </div>
 
             {/* 右: 日付・天気・アクションボタン */}
-            <div className="flex items-center gap-3 text-[13px] lg:text-[14px] text-[#9B9890] tracking-wide">
+            <div className="flex items-center gap-3 text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide">
               <span>{entry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
               <span>{entry.temperature}°C / {entry.weather}</span>
@@ -185,7 +185,7 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
           {/* テキストコンテンツ */}
           <div className="flex-1 space-y-6 lg:space-y-10 mt-8 lg:mt-12 lg:px-4">
             <p
-              className="text-[15px] lg:text-[18px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl"
+              className="text-[15px] lg:text-[20px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl"
               style={{ fontWeight: 400 }}
             >
               {entry.text}
@@ -197,7 +197,7 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
                 {entry.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[12px] tracking-wider rounded-full transition-colors hover:bg-[#D4CFC3]/30"
+                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[13px] tracking-wider rounded-full transition-colors hover:bg-[#D4CFC3]/30"
                     style={{ fontWeight: 400 }}
                   >
                     #{tag}

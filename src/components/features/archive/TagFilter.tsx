@@ -20,7 +20,7 @@ export function TagFilter({
             <button
                 onClick={onClick}
                 className={`
-          flex items-center gap-3 px-4 py-2.5 lg:px-6 lg:py-3 rounded-sm text-[12px] lg:text-[13px] tracking-wide transition-all
+          flex items-center gap-3 px-4 py-2.5 lg:px-6 lg:py-3 rounded-sm text-[12px] lg:text-[14px] tracking-wide transition-all
           bg-[#D4CFC3] text-[#3D3D3A] hover:bg-[#C9C4B8]
         `}
                 style={{ fontWeight: 400 }}

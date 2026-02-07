@@ -22,7 +22,7 @@ export function BookmarkCard({ entry }: BookmarkCardProps) {
     >
       <div className="flex gap-4 lg:flex-col lg:gap-5">
         {/* サムネイル */}
-        <div className="w-20 h-20 flex-shrink-0 bg-[#F5F4F0] rounded-sm overflow-hidden lg:w-full lg:h-48 lg:aspect-[4/3] relative">
+        <div className="w-20 h-20 flex-shrink-0 bg-[#F5F4F0] rounded-sm overflow-hidden lg:w-full lg:h-48 lg:aspect-[16/10] relative">
           <Image
             src={entry.image}
             alt="Entry thumbnail"
@@ -43,7 +43,7 @@ export function BookmarkCard({ entry }: BookmarkCardProps) {
         <div className="flex-1 flex flex-col justify-between min-w-0 lg:gap-4">
           {/* Text Preview */}
           <p
-            className="text-[14px] lg:text-[15px] leading-[1.6] lg:leading-[1.8] text-[#3D3D3A] tracking-wide truncate lg:line-clamp-2"
+            className="text-[14px] lg:text-[16px] leading-[1.6] lg:leading-[1.8] text-[#3D3D3A] tracking-wide truncate lg:line-clamp-2"
             style={{ fontWeight: 400 }}
           >
             {entry.text}
@@ -51,7 +51,7 @@ export function BookmarkCard({ entry }: BookmarkCardProps) {
 
           {/* Metadata */}
           <div className="flex items-center justify-between mt-3 lg:mt-0">
-            <div className="flex items-center gap-3 text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide">
+            <div className="flex items-center gap-3 text-[11px] lg:text-[13px] text-[#9B9890] tracking-wide">
               <span>{entry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
               <span>{entry.temperature} °C</span>
@@ -75,7 +75,7 @@ export function BookmarkCard({ entry }: BookmarkCardProps) {
               {entry.tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="text-[10px] lg:text-[11px] text-[#A8A89E] tracking-wider"
+                  className="text-[10px] lg:text-[12px] text-[#A8A89E] tracking-wider"
                   style={{ fontWeight: 400 }}
                 >
                   #{tag}
@@ -101,7 +101,7 @@ export function BookmarkCard({ entry }: BookmarkCardProps) {
 
               {/* Author Name */}
               <span
-                className="text-[11px] lg:text-[12px] text-[#A8A89E] tracking-wide"
+                className="text-[11px] lg:text-[13px] text-[#A8A89E] tracking-wide"
                 style={{ fontWeight: 400 }}
               >
                 {entry.user.displayName}

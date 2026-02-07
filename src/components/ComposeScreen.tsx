@@ -43,7 +43,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="px-8 lg:px-12 py-2.5 lg:py-3 bg-[#D4CFC3] text-[#3D3D3A] text-[13px] lg:text-[14px] tracking-[0.08em] rounded-sm transition-all hover:opacity-80 hover:shadow-md"
+      className="px-8 lg:px-12 py-2.5 lg:py-3 bg-[#D4CFC3] text-[#3D3D3A] text-[13px] lg:text-[15px] tracking-[0.08em] rounded-sm transition-all hover:opacity-80 hover:shadow-md"
       style={{ fontWeight: 400 }}
       onClick={() => console.log('SubmitButton clicked')}
     >
@@ -234,7 +234,7 @@ export function ComposeScreen() {
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 lg:gap-6">
                 <ImagePlus className="w-10 h-10 lg:w-16 lg:h-16 text-[#D4CFC3] transition-transform hover:scale-110" strokeWidth={1.5} />
-                <span className="text-[13px] lg:text-[15px] text-[#9B9890] tracking-wider">風景を追加</span>
+                <span className="text-[13px] lg:text-[16px] text-[#9B9890] tracking-wider">風景を追加</span>
               </div>
             )}
           </label>
@@ -264,7 +264,7 @@ export function ComposeScreen() {
               value={post.text}
               onChange={(e) => setPost({ ...post, text: e.target.value })}
               placeholder="今考えていることを書き留めましょう..."
-              className="w-full h-32 lg:h-48 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[16px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide"
+              className="w-full h-32 lg:h-48 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[17px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide"
               style={{ fontWeight: 400 }}
               name="text"
             />
@@ -283,7 +283,7 @@ export function ComposeScreen() {
                   onKeyDown={handleTagKeyDown}
                   onBlur={handleTagBlur}
                   placeholder={tagList.length === 0 ? "春, 食べ物, 晴れ..." : ""}
-                  className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[15px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
+                  className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[16px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
                   style={{ fontWeight: 400 }}
                 // name="tags"
                 />
@@ -293,7 +293,7 @@ export function ComposeScreen() {
                     key={tag}
                     type="button"
                     onClick={() => removeTag(tag)}
-                    className="group px-3.5 py-1.5 lg:px-4 lg:py-2 bg-[#E8E6E0]/80 hover:bg-[#D4CFC3]/60 text-[#3D3D3A] text-[12px] lg:text-[13px] tracking-wide rounded-full transition-all hover:shadow-sm flex items-center gap-1.5 animate-fadeIn"
+                    className="group px-3.5 py-1.5 lg:px-4 lg:py-2 bg-[#E8E6E0]/80 hover:bg-[#D4CFC3]/60 text-[#3D3D3A] text-[12px] lg:text-[14px] tracking-wide rounded-full transition-all hover:shadow-sm flex items-center gap-1.5 animate-fadeIn"
                     style={{ fontWeight: 400 }}
                   >
                     <span>#{tag}</span>
@@ -312,7 +312,7 @@ export function ComposeScreen() {
             <button
               type="button"
               onClick={() => setPost({ ...post, isPublic: !post.isPublic })}
-              className="flex items-center gap-3 text-[13px] lg:text-[14px] text-[#A8A89E] tracking-wide transition-colors hover:text-[#3D3D3A]"
+              className="flex items-center gap-3 text-[13px] lg:text-[15px] text-[#A8A89E] tracking-wide transition-colors hover:text-[#3D3D3A]"
               style={{ fontWeight: 400 }}
             >
               {post.isPublic ? (
@@ -393,14 +393,14 @@ export function ComposeScreen() {
             <DialogFooter className="flex-row gap-2 sm:gap-2">
               <button
                 onClick={() => setIsCropOpen(false)}
-                className="flex-1 py-2.5 border border-[#D4CFC3] text-[#9B9890] text-[13px] lg:text-[14px] tracking-[0.08em] rounded-sm transition-all hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50"
+                className="flex-1 py-2.5 border border-[#D4CFC3] text-[#9B9890] text-[13px] lg:text-[15px] tracking-[0.08em] rounded-sm transition-all hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50"
                 style={{ fontWeight: 400 }}
               >
                 キャンセル
               </button>
               <button
                 onClick={handleCropConfirm}
-                className="flex-1 py-2.5 bg-[#D4CFC3] text-[#3D3D3A] text-[13px] lg:text-[14px] tracking-[0.08em] rounded-sm transition-all hover:opacity-80 hover:shadow-md"
+                className="flex-1 py-2.5 bg-[#D4CFC3] text-[#3D3D3A] text-[13px] lg:text-[15px] tracking-[0.08em] rounded-sm transition-all hover:opacity-80 hover:shadow-md"
                 style={{ fontWeight: 400 }}
               >
                 完了

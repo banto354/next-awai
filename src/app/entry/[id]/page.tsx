@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { Entry } from '@/app/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
 import { auth } from '@clerk/nextjs/server';
+import { formatDateTimeJapanese } from '@/lib/dateUtils';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -39,7 +40,7 @@ export default async function EntryPage({ params }: PageProps) {
     id: post.id,
     image: post.imageUrl || "",
     text: post.content,
-    date: post.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    date: formatDateTimeJapanese(post.createdAt),
     weatherId: post.weatherId ?? 0,
     weather: getWeatherLabel(post.weatherId),
     temperature: Math.round(post.temp ?? 0),

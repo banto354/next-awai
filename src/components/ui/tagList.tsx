@@ -11,7 +11,7 @@ export function TagList({ tags = [], onTagClick }: TagListProps) {
       {tags.map((tag, index) => (
         <span
           key={`${tag}-${index}`}
-          className={`text-[10px] lg:text-[11px] text-[#A8A89E] tracking-wider hover:text-[#3D3D3A] transition-colors ${onTagClick ? 'cursor-pointer' : 'cursor-default'}`}
+          className={`text-[10px] lg:text-[12px] text-[#A8A89E] tracking-wider hover:text-[#3D3D3A] transition-colors ${onTagClick ? 'cursor-pointer' : 'cursor-default'}`}
           style={{ fontWeight: 400 }}
           onClick={onTagClick ? (e) => {
             e.preventDefault();

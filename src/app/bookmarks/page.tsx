@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { BookmarkEntry } from '../types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
+import { formatDateJapanese } from '@/lib/dateUtils';
 
 export default async function BookmarksPage() {
     // 認証チェック
@@ -37,7 +38,7 @@ export default async function BookmarksPage() {
         id: bookmark.post.id,
         image: bookmark.post.imageUrl || "",
         text: bookmark.post.content,
-        date: bookmark.post.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        date: formatDateJapanese(bookmark.post.createdAt),
         weatherId: bookmark.post.weatherId ?? 0,
         weather: bookmark.post.weatherId ? getWeatherLabel(bookmark.post.weatherId) : "天気不明",
         temperature: Math.round(bookmark.post.temp ?? 0),
