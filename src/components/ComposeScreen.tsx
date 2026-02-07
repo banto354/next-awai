@@ -249,7 +249,7 @@ export function ComposeScreen() {
             <div className="flex items-center gap-2 text-[#A8A89E]">
               <CloudRain className="w-4 h-4" />
               {/* 気候情報取得要 */}
-              <span className="text-[13px] tracking-wide">{weather?.temp} / {weather?.description}</span>
+              <span className="text-[13px] tracking-wide">{weather?.temp}°C / {weather?.description}</span>
             </div>
           </div>
         </div>
@@ -296,9 +296,9 @@ export function ComposeScreen() {
           />
 
           {/* デスクトップ時の天気表示 */}
-          <div className="hidden lg:flex items-center gap-2 text-[#A8A89E] mt-6">
-            <CloudRain className="w-4 h-4" />
-            <span className="text-[13px] tracking-wide">{weather?.temp}°C / {weather?.description}</span>
+          <div className="hidden lg:flex items-center gap-3 text-[#7A7A70] mt-6">
+            <CloudRain className="w-5 h-5" />
+            <span className="text-[15px] font-medium tracking-wide">{weather?.temp}°C / {weather?.description}</span>
           </div>
         </div>
 
@@ -307,12 +307,14 @@ export function ComposeScreen() {
 
         {/* テキストエリア */}
         <div className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:justify-center lg:bg-[#F9F8F5]">
-          <div className="flex-1 lg:flex-initial lg:space-y-8">
+          {/* 左パネルのヘッダー分の高さを確保し、画像の下端と揃える */}
+          <div className="hidden lg:block h-14" aria-hidden="true" />
+          <div className="flex-1 lg:flex-initial lg:space-y-4">
             <textarea
               value={post.text}
               onChange={(e) => setPost({ ...post, text: e.target.value })}
               placeholder="今考えていることを書き留めましょう..."
-              className={`w-full h-32 lg:h-48 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[17px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide ${validationWarnings.text ? 'text-red-800/80' : ''}`}
+              className={`w-full h-32 lg:h-20 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[17px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide ${validationWarnings.text ? 'text-red-800/80' : ''}`}
               style={{ fontWeight: 400 }}
               name="text"
             />
