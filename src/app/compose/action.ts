@@ -13,121 +13,127 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// 定数定義
+const MAX_TEXT_LENGTH = 50;
+const MAX_TAG_COUNT = 5;
+const MAX_TAG_LENGTH = 10;
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+// バリデーションスキーマ
+const postSchema = z.object({
+    text: z.string()
+        .min(1, "テキストは必須です")
+        .max(MAX_TEXT_LENGTH, `テキストは${MAX_TEXT_LENGTH}文字以内にしてください`),
+    tags: z.array(z.string().max(MAX_TAG_LENGTH, `タグは${MAX_TAG_LENGTH}文字以内にしてください`))
+        .max(MAX_TAG_COUNT, `タグは${MAX_TAG_COUNT}個以内にしてください`),
+});
+
 export async function addPostAction(prevState: any, formData: FormData) {
-    // 認証チェック
+    // 1. 認証チェック
     const { userId } = await auth();
     if (!userId) {
         return { success: false, error: "ログインしていません" };
     }
 
-    // フォームデータの取得
+    // 2. フォームデータの取得
     const text = formData.get('text') as string;
     const imageFile = formData.get('image') as File;
     const isPublic = formData.get('isPublic') === 'true';
     const tagsString = formData.get('tags') as string;
-    // 位置情報（後述の修正が必要）
     const latStr = formData.get('latitude') as string;
     const lngStr = formData.get('longitude') as string;
     const latitude = Number(latStr) || 0;
     const longitude = Number(lngStr) || 0;
-    const weather = formData.get('weather') as string;
     const weatherId = formData.get('weatherId') as string;
     const temp = formData.get('temp') as string;
 
-    // 画像のアップロード処理
-    let imageUrl: string | null = null;
-    // バリデーション
-    console.log('バリデーション');
-    const schema = z.object({
-        text: z.string().min(1, "テキストは必須です"),
-        tags: z.string(),
-        // latitude: z.string(),
-        // longitude: z.string(),
+    // タグの処理（カンマ区切りを配列にして整形）
+    const tagNames = tagsString
+        .split(',')
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0);
+
+    // 3. バリデーション（画像アップロード前に実行）
+    const validatedFields = postSchema.safeParse({
+        text: text,
+        tags: tagNames,
     });
 
-    if (imageFile && imageFile.size > 0) {
-        // ファイル名をユニークにする (例: user_id/timestamp-random.png)
-        const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${imageFile.name.split('.').pop()}`;
+    if (!validatedFields.success) {
+        const errorMessages = validatedFields.error.issues.map((e: z.ZodIssue) => e.message).join(', ');
+        console.log('バリデーションエラー:', errorMessages);
+        return { success: false, error: errorMessages };
+    }
 
-        const { data, error } = await supabase.storage
-            .from('post-image') // ★Supabase内のバケット名
-            .upload(fileName, imageFile, {
-                contentType: imageFile.type,
-                upsert: false,
-            });
-        console.log('画像のアップロード');
-        if (error) {
-            console.error('Upload Error:', error);
-            return { success: false, error: "画像のアップロードに失敗しました" };
-        }
-
-        // 公開URLを取得
-        const { data: publicUrlData } = supabase.storage
-            .from('post-image')
-            .getPublicUrl(fileName);
-
-        imageUrl = publicUrlData.publicUrl;
-
-        // タグの処理（カンマ区切りを配列にして整形）
-        const tagNames = tagsString
-            .split(',')
-            .map((t) => t.trim())
-            .filter((t) => t.length > 0); // 空文字を除去
-
-        const validatedFields = schema.safeParse({
-            text: text,
-            tags: tagsString,
-        });
-
-        if (!validatedFields.success) {
-            console.log('バリデーションエラー', validatedFields.error);
-            return { success: false, error: "入力内容に誤りがあります" };
-        }
-        // データベースへの保存
-        try {
-            console.log('データベースへの保存');
-            await prisma.post.create({
-                data: {
-                    userId: userId,
-                    content: text,
-                    imageUrl: imageUrl,
-                    isPublic: isPublic,
-                    latitude: latitude || 0,
-                    longitude: longitude || 0,
-                    temp: Number(temp) || null,
-                    weatherId: Number(weatherId) || null,
-                    // タグのリレーション保存
-                    tags: {
-                        create: tagNames.map((name) => ({
-                            tag: {
-                                connectOrCreate: {
-                                    where: { name: name }, // 既にタグがあれば接続
-                                    create: { name: name }, // なければ新規作成
-                                },
-                            },
-                        })),
-                    },
-                },
-            });
-        } catch (error) {
-            if (error instanceof z.ZodError) {
-                console.error('バリデーションエラー:', error);
-                return { success: false, error: "入力内容に誤りがあります" };
-            } else if (error instanceof Error) {
-                console.error('データベースエラー:', error);
-                return { success: false, error: "投稿の保存に失敗しました" };
-            } else {
-                console.error('予期せぬエラー:', error);
-                return { success: false, error: "予期せぬエラーが発生しました" };
-            }
-        }
-    } else {
-        console.log('画像を選択してください');
+    // 4. 画像バリデーション
+    if (!imageFile || imageFile.size === 0) {
         return { success: false, error: "画像を選択してください" };
     }
-    // 　完了後の処理
-    revalidatePath('/'); // タイムライン等を更新    
-    redirect('/archive'); // トップページへ戻る
+
+    if (imageFile.size > MAX_IMAGE_SIZE) {
+        return { success: false, error: `画像サイズは${MAX_IMAGE_SIZE / 1024 / 1024}MB以内にしてください` };
+    }
+
+    if (!ALLOWED_IMAGE_TYPES.includes(imageFile.type)) {
+        return { success: false, error: "画像形式はJPEG、PNG、WebP、GIFのみ対応しています" };
+    }
+
+    // 5. 画像のアップロード処理
+    let imageUrl: string | null = null;
+    const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${imageFile.name.split('.').pop()}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('post-image')
+        .upload(fileName, imageFile, {
+            contentType: imageFile.type,
+            upsert: false,
+        });
+
+    if (uploadError) {
+        console.error('Upload Error:', uploadError);
+        return { success: false, error: "画像のアップロードに失敗しました" };
+    }
+
+    // 公開URLを取得
+    const { data: publicUrlData } = supabase.storage
+        .from('post-image')
+        .getPublicUrl(fileName);
+
+    imageUrl = publicUrlData.publicUrl;
+
+    // 6. データベースへの保存
+    try {
+        await prisma.post.create({
+            data: {
+                userId: userId,
+                content: text,
+                imageUrl: imageUrl,
+                isPublic: isPublic,
+                latitude: latitude || 0,
+                longitude: longitude || 0,
+                temp: Number(temp) || null,
+                weatherId: Number(weatherId) || null,
+                tags: {
+                    create: tagNames.map((name) => ({
+                        tag: {
+                            connectOrCreate: {
+                                where: { name: name },
+                                create: { name: name },
+                            },
+                        },
+                    })),
+                },
+            },
+        });
+    } catch (error) {
+        console.error('データベースエラー:', error);
+        return { success: false, error: "投稿の保存に失敗しました" };
+    }
+
+    // 7. 完了後の処理
+    revalidatePath('/');
+    redirect('/archive');
 }
 
 export async function deletePostAction(postId: string, imageUrl: string | null) {

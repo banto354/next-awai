@@ -8,6 +8,12 @@ import { formatDateJapanese } from "@/lib/dateUtils";
 export default async function ArchivePage() {
     // 認証はmiddlewareで処理済み。userIdはDB検索に使用
     const { userId } = await auth();
+
+    // TypeScriptの型チェック用（Middlewareで認証済みのため実行時にはnullにならない）
+    if (!userId) {
+        return <ArchiveScreen initialEntries={[]} />;
+    }
+
     // DBから投稿を取得
     const posts = await prisma.post.findMany({
         where: {
