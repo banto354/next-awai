@@ -16,7 +16,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"; // コンポーネントのパスは環境に合わせて調整してください
-import { deletePostAction } from '@/app/compose/action'; // Actionをインポート
+import { deletePostAction } from '@/app/compose/action';
+import { toggleBookmarkAction } from '@/app/bookmarks/action';
 
 interface EntryDetailFeedProps {
   entry: Entry;
@@ -31,9 +32,14 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
   const [isBookmarked, setIsBookmarked] = useState(entry.isBookmarked);
 
   const toggleBookmark = () => {
+    const previousState = isBookmarked;
     setIsBookmarked(!isBookmarked);
-    // TODO: ここで Server Action を呼んでDB更新を行う
-
+    startTransition(async () => {
+      const result = await toggleBookmarkAction(entry.id);
+      if (!result.success) {
+        setIsBookmarked(previousState);
+      }
+    });
   };
 
   const handleDelete = () => {
@@ -83,16 +89,34 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
             )}
           </div>
 
-          {/* メタデータ */}
-          <div className="flex items-center justify-between text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide mt-8 lg:mt-12 lg:px-4">
-            <div className="flex gap-4">
+          {/* メタデータ行 (ユーザー左 / 日付・アクション右) */}
+          <div className="flex items-center justify-between mt-8 lg:mt-12 lg:px-4">
+
+            {/* 左: ユーザー情報 */}
+            <div className="flex items-center gap-3">
+              <div className="relative w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
+                {entry.user.userImage ? (
+                  <Image
+                    src={entry.user.userImage}
+                    alt={entry.user.displayName}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#D4CFC3]" />
+                )}
+              </div>
+              <span className="text-[13px] lg:text-[14px] text-[#9B9890] tracking-wide font-normal">
+                {entry.user.displayName}
+              </span>
+            </div>
+
+            {/* 右: 日付・天気・アクションボタン */}
+            <div className="flex items-center gap-3 text-[13px] lg:text-[14px] text-[#9B9890] tracking-wide">
               <span>{entry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
-              <span>{entry.temperature} °C</span>
-              <span className="text-[#D4CFC3]">/</span>
-              <span>{entry.weather}</span>
-            </div>
-            <div className="flex items-center gap-4">
+              <span>{entry.temperature}°C / {entry.weather}</span>
+              <span className="text-[#D4CFC3]">·</span>
               {/* 削除ボタン (所有者のみ表示) */}
               {isAuthor && (
                 <AlertDialog>

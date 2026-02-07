@@ -23,10 +23,9 @@ export default async function EntryPage({ params }: PageProps) {
       tags: {
         include: { tag: true },
       },
-      // // 自分がブックマークしているか確認
-      // bookmarkedBy: {
-      //   where: { userId: userId },
-      // },
+      bookmarkedBy: {
+        where: { userId: currentUserID ?? '' },
+      },
     },
   });
 
@@ -48,6 +47,7 @@ export default async function EntryPage({ params }: PageProps) {
     isPublic: post.isPublic,
     latitude: post.latitude ?? 0,
     longitude: post.longitude ?? 0,
+    isBookmarked: post.bookmarkedBy.length > 0,
     user: {
       displayName: post.user.displayName || "Unknown",
       userImage: post.user.userImage || "",

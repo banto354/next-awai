@@ -56,7 +56,7 @@ export function BookmarksScreen({ bookmarkedEntries }: BookmarksScreenProps) {
         </div>
       ) : (
         /* グリッドレイアウト */
-        <div className="space-y-1 lg:space-y-0 lg:px-16">
+        <div className="px-6 space-y-1 lg:space-y-0 lg:px-16">
           <div className="lg:max-w-7xl lg:mx-auto lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
             {bookmarkedEntries.map((entry) => (
               <BookmarkCard key={entry.id} entry={entry} />

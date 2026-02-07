@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { mockEntries } from '@/app/data/mockEntries';
 import { getStreamPostsAction } from '@/app/stream/action';
+import { toggleBookmarkAction } from '@/app/bookmarks/action';
 import { StreamEntry } from '@/app/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
 
@@ -29,8 +30,7 @@ export function StreamScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
-  // モック
-  // const currentEntry = mockEntries[currentIndex];
+  const [, startTransition] = useTransition();
 
   // 位置情報を取得して投稿をロードする関数
   const loadStream = async () => {
@@ -47,6 +47,10 @@ export function StreamScreen() {
       const posts = await getStreamPostsAction(position.coords.latitude, position.coords.longitude);
       if (posts.length > 0) {
         setEntries(posts);
+        const initialBookmarks = new Set(
+          posts.filter((p) => p.isBookmarked).map((p) => p.id)
+        );
+        setBookmarkedIds(initialBookmarks);
       } else {
         // データがない場合はフォールバック（モック or 全体ランダム）
         setEntries([]);
@@ -77,6 +81,7 @@ export function StreamScreen() {
   };
 
   const toggleBookmark = () => {
+    const previousBookmarked = bookmarkedIds.has(currentEntry.id);
     setBookmarkedIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(currentEntry.id)) {
@@ -85,6 +90,21 @@ export function StreamScreen() {
         newSet.add(currentEntry.id);
       }
       return newSet;
+    });
+    startTransition(async () => {
+      const result = await toggleBookmarkAction(currentEntry.id);
+      if (!result.success) {
+        // ロールバック
+        setBookmarkedIds((prev) => {
+          const newSet = new Set(prev);
+          if (previousBookmarked) {
+            newSet.add(currentEntry.id);
+          } else {
+            newSet.delete(currentEntry.id);
+          }
+          return newSet;
+        });
+      }
     });
   };
 
@@ -122,7 +142,7 @@ export function StreamScreen() {
         <div className="lg:max-w-4xl lg:mx-auto w-full">
 
           {/* Image Area */}
-          <div className="relative w-full aspect-[4/5] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
+          <div className="relative w-full aspect-[16/10] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
             {currentEntry.image ? (
               <Image
                 src={currentEntry.image}
@@ -194,10 +214,8 @@ export function StreamScreen() {
             )}
           </div>
 
-        </div>
-      </div>
-      {/* ナビゲーションコントロール　*/}
-      <div className="px-6 pb-8 flex items-center justify-between lg:justify-center lg:gap-32 lg:pb-12 lg:max-w-4xl lg:mx-auto lg:w-full">
+          {/* ナビゲーションコントロール */}
+          <div className="flex items-center justify-between mt-8 lg:justify-center lg:gap-32 lg:mt-12">
         <button
           onClick={handlePrevious}
           className="p-3 lg:p-4 text-[#A8A89E] transition-all hover:text-[#3D3D3A] hover:scale-110"
@@ -231,16 +249,19 @@ export function StreamScreen() {
         >
           <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
         </button>
-      </div>
+          </div>
 
-      {/* Privacy Indicator - Subtle */}
-      <div className="px-6 pb-4 flex justify-center lg:pb-8">
-        <div
-          className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full"
-          style={{
-            backgroundColor: currentEntry.isPublic ? '#A8A89E' : '#D4CFC3'
-          }}
-        />
+          {/* Privacy Indicator - Subtle */}
+          <div className="pt-4 pb-2 flex justify-center lg:pt-6 lg:pb-4">
+            <div
+              className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full"
+              style={{
+                backgroundColor: currentEntry.isPublic ? '#A8A89E' : '#D4CFC3'
+              }}
+            />
+          </div>
+
+        </div>
       </div>
     </div>
   );

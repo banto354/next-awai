@@ -25,23 +25,27 @@ export async function getStreamPostsAction(
         // PostGISを使わない簡易的な距離計算（三平方の定理の近似）とランダムソート
         // ORDER BY (距離係数 * 距離) + (ランダム係数 * RANDOM()) のようなイメージ
         const commonSelect = Prisma.sql`
-          p.id, 
-          p.content, 
-          p.image_url, 
-          p.created_at, 
-          p.weather_id, 
+          p.id,
+          p.content,
+          p.image_url,
+          p.created_at,
+          p.weather_id,
           p.temp,
           p.latitude,
           p.longitude,
-          u."userName", 
-          u."display_name", 
+          u."userName",
+          u."display_name",
           u."user_image",
           (
             SELECT COALESCE(JSON_AGG(t.name), '[]')
             FROM "tags" t
             JOIN "post_tags" pt ON t.id = pt.tag_id
             WHERE pt.post_id = p.id
-          ) AS tags_json
+          ) AS tags_json,
+          EXISTS (
+            SELECT 1 FROM "bookmarks" b
+            WHERE b.post_id = p.id AND b.user_id = ${userId ?? ''}
+          ) AS is_bookmarked
              `;
 
         //   -- 簡易距離計算 
@@ -92,6 +96,7 @@ export async function getStreamPostsAction(
             isPublic: true,
             latitude: post.latitude,
             longitude: post.longitude,
+            isBookmarked: post.is_bookmarked ?? false,
             user: {
                 userName: post.userName,
                 displayName: post.display_name || post.userName,

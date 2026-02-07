@@ -263,7 +263,7 @@ export function ComposeScreen() {
             <textarea
               value={post.text}
               onChange={(e) => setPost({ ...post, text: e.target.value })}
-              placeholder="Write a quiet thought..."
+              placeholder="今考えていることを書き留めましょう..."
               className="w-full h-32 lg:h-48 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[16px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide"
               style={{ fontWeight: 400 }}
               name="text"
@@ -282,7 +282,7 @@ export function ComposeScreen() {
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagKeyDown}
                   onBlur={handleTagBlur}
-                  placeholder={tagList.length === 0 ? "春, 静寂, 発見..." : ""}
+                  placeholder={tagList.length === 0 ? "春, 食べ物, 晴れ..." : ""}
                   className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[15px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
                   style={{ fontWeight: 400 }}
                 // name="tags"
