@@ -1,17 +1,13 @@
 import { BookmarksScreen } from "../../components/BookmarksScreen";
 import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { BookmarkEntry } from '../types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
 import { formatDateJapanese } from '@/lib/dateUtils';
 
 export default async function BookmarksPage() {
-    // 認証チェック
+    // 認証はmiddlewareで処理済み。userIdはDB検索に使用
     const { userId } = await auth();
-    if (!userId) {
-        redirect('/sign-in');
-    }
     // DBから投稿を取得
     const bookmarks = await prisma.bookmark.findMany({
         where: {
