@@ -2,8 +2,11 @@
 
 import { PenLine } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
 
 export function LandingPage() {
+  const { isSignedIn } = useAuth();
+
   return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#FAFAF8] relative overflow-hidden">
       {/* 背景の装飾（あわいグラデーション） */}
@@ -26,9 +29,9 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* Enterボタン（App.tsxの handleEnterApp に相当） */}
+        {/* Enterボタン：ログイン済みなら/compose、未ログインなら/sign-in */}
         <Link
-          href="/sign-in"
+          href={isSignedIn ? "/compose" : "/sign-in"}
           className="group relative px-8 lg:px-12 py-2.5 lg:py-3 overflow-hidden rounded-sm transition-all hover:shadow-md"
         >
           <div className="absolute inset-0 bg-[#E8E6E0] group-hover:bg-[#D4CFC3] transition-colors duration-500" />
