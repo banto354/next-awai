@@ -187,7 +187,7 @@ export function StreamScreen() {
             {/* 左: ユーザー情報 */}
             <div className="flex items-center gap-3">
               {/* アバター */}
-              <div className="relative w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
+              <div className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
                 {currentEntry.user.userImage ? (
                   <Image
                     src={currentEntry.user.userImage}
@@ -227,7 +227,7 @@ export function StreamScreen() {
                     key={index}
                     className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[13px] tracking-wider rounded-full"
                   >
-                    {tag}
+                    # {tag}
                   </span>
                 ))}
               </div>
