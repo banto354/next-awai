@@ -8,9 +8,10 @@ import { getWeatherLabel } from '@/lib/weatherUtils';
 // プロパティの型定義
 interface ArchiveCardProps {
   entry: ArchiveEntry;
+  onTagClick?: (tag: string) => void;
 }
 
-export function ArchiveCard({ entry }: ArchiveCardProps) {
+export function ArchiveCard({ entry, onTagClick }: ArchiveCardProps) {
   return (
     <Link href={`/entry/${entry.id}`} className="block group">
       <div
@@ -65,7 +66,7 @@ export function ArchiveCard({ entry }: ArchiveCardProps) {
             </div>
 
             {/* タグ */}
-            <TagList tags={entry.tags} />
+            <TagList tags={entry.tags} onTagClick={onTagClick} />
           </div>
         </div>
       </div>

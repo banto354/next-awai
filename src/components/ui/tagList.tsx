@@ -1,8 +1,9 @@
 interface TagListProps {
   tags: string[];
+  onTagClick?: (tag: string) => void;
 }
 
-export function TagList({ tags = [] }: TagListProps) {
+export function TagList({ tags = [], onTagClick }: TagListProps) {
   if (tags.length === 0) return null;
 
   return (
@@ -10,10 +11,14 @@ export function TagList({ tags = [] }: TagListProps) {
       {tags.map((tag, index) => (
         <span
           key={`${tag}-${index}`}
-          className="text-[10px] lg:text-[11px] text-[#A8A89E] tracking-wider hover:text-[#3D3D3A] transition-colors cursor-default"
+          className={`text-[10px] lg:text-[11px] text-[#A8A89E] tracking-wider hover:text-[#3D3D3A] transition-colors ${onTagClick ? 'cursor-pointer' : 'cursor-default'}`}
           style={{ fontWeight: 400 }}
+          onClick={onTagClick ? (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onTagClick(tag);
+          } : undefined}
         >
-          {/* 文脈に応じて '#' をつけるか、あるいは別の記号（例：· ）にするのも詩的です */}
           #{tag}
         </span>
       ))}

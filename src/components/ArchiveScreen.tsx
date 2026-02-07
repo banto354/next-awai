@@ -3,20 +3,33 @@
 import { useState } from 'react';
 import { ArchiveCard } from './features/archive/ArchiveCard';
 import { TemperatureFilter } from './features/archive/TemperatureFilter';
-import { Entry } from '@/app/types/entry';
+import { TagFilter } from './features/archive/TagFilter';
+import { ArchiveEntry } from '@/app/types/entry';
 
 // Propsの定義（この画面専用の受け皿）
 interface ArchiveScreenProps {
-  initialEntries: Entry[]; // ★共通のEntry型を使う
+  initialEntries: ArchiveEntry[]; // ★ArchiveEntry型を使う
 }
 
 export function ArchiveScreen({ initialEntries }: ArchiveScreenProps) {
-  const [filterActive, setFilterActive] = useState(false);
+  const [tempFilterActive, setTempFilterActive] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const currentTemp = 10; // Mock current temperature
 
-  const filteredEntries = filterActive
-    ? initialEntries.filter((entry) => entry.temperature === currentTemp)
-    : initialEntries;
+  // フィルタリングロジック：気温とタグの両方を適用
+  const filteredEntries = initialEntries.filter((entry) => {
+    const tempMatch = tempFilterActive ? entry.temperature === currentTemp : true;
+    const tagMatch = selectedTag ? entry.tags.includes(selectedTag) : true;
+    return tempMatch && tagMatch;
+  });
+
+  const handleTagClick = (tag: string) => {
+    setSelectedTag(tag);
+  };
+
+  const clearTagFilter = () => {
+    setSelectedTag(null);
+  };
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-8 lg:pb-16">
@@ -28,11 +41,21 @@ export function ArchiveScreen({ initialEntries }: ArchiveScreenProps) {
       </div>
 
       {/* フィルター */}
-      <div className="px-6 pb-8 lg:px-16 lg:pb-12">
+      <div className="px-6 pb-4 lg:px-16 lg:pb-6">
         <TemperatureFilter
-          active={filterActive}
+          active={tempFilterActive}
           temp={currentTemp}
-          onClick={() => setFilterActive(!filterActive)}
+          onClick={() => setTempFilterActive(!tempFilterActive)}
+          hasMatches={filteredEntries.length > 0}
+        />
+      </div>
+
+      {/* タグフィルター表示 */}
+      <div className="px-6 pb-8 lg:px-16 lg:pb-12">
+        <TagFilter
+          active={selectedTag !== null}
+          tag={selectedTag || ''}
+          onClick={clearTagFilter}
           hasMatches={filteredEntries.length > 0}
         />
       </div>
@@ -41,7 +64,11 @@ export function ArchiveScreen({ initialEntries }: ArchiveScreenProps) {
       <div className="space-y-1 lg:space-y-0 lg:px-16">
         <div className="lg:max-w-7xl lg:mx-auto lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
           {filteredEntries.map((entry) => (
-            <ArchiveCard key={entry.id} entry={entry} />
+            <ArchiveCard
+              key={entry.id}
+              entry={entry}
+              onTagClick={handleTagClick}
+            />
           ))}
         </div>
       </div>
