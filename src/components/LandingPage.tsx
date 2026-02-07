@@ -28,7 +28,7 @@ export function LandingPage() {
 
         {/* Enterボタン（App.tsxの handleEnterApp に相当） */}
         <Link
-          href="/stream"
+          href="/sign-in"
           className="group relative px-8 lg:px-12 py-2.5 lg:py-3 overflow-hidden rounded-sm transition-all hover:shadow-md"
         >
           <div className="absolute inset-0 bg-[#E8E6E0] group-hover:bg-[#D4CFC3] transition-colors duration-500" />

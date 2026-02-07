@@ -11,21 +11,24 @@ export async function POST(req: NextRequest) {
 
         if (eventType === 'user.created' || eventType === 'user.updated') {
             try {
-                const { id, username, image_url, email_addresses } = evt.data;
+                const { id, username, image_url, email_addresses, first_name, last_name } = evt.data;
                 const email = email_addresses && email_addresses.length > 0 ? email_addresses[0].email_address : "";
+                const displayName = `${first_name || ''}${last_name || ''}` || username || `user_${id}`;
                 // create と update を統合
                 await prisma.user.upsert({
                     where: {
-                        id: id as string, // このIDを探す
+                        id: id as string,
                     },
-                    update: { // あれば更新
+                    update: {
                         userName: username || `user_${id}` as string,
+                        displayName: displayName,
                         userImage: image_url as string,
                         email: email,
                     },
-                    create: { // なければ作成
+                    create: {
                         id: id as string,
                         userName: username || `user_${id}` as string,
+                        displayName: displayName,
                         userImage: image_url as string,
                         email: email,
                     }

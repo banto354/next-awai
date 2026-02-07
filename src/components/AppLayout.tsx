@@ -113,9 +113,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {/* デスクトップ用ナビゲーション - 上部サイドバー、デスクトップでのみ表示 */}
             <nav className="hidden lg:flex fixed top-0 left-0 h-full w-20 xl:w-24 border-r border-[#D4CFC3]/10 bg-[#F9F8F5]/95 backdrop-blur-sm flex-col items-center py-12 gap-12 z-50">
                 {/* ロゴ */}
-                <div className="text-[11px] tracking-[0.2em] uppercase text-[#9B9890] rotate-0 mb-8">
+                <Link href="/" className="text-[11px] tracking-[0.2em] uppercase text-[#9B9890] hover:text-[#3D3D3A] transition-colors mb-8">
                     AWAI
-                </div>
+                </Link>
 
                 {/* ナビゲーションアイテム */}
                 <div className="flex flex-col gap-8">
