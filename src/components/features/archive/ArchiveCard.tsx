@@ -8,9 +8,10 @@ import { getWeatherLabel } from '@/lib/weatherUtils';
 // プロパティの型定義
 interface ArchiveCardProps {
   entry: ArchiveEntry;
+  onTagClick?: (tag: string) => void;
 }
 
-export function ArchiveCard({ entry }: ArchiveCardProps) {
+export function ArchiveCard({ entry, onTagClick }: ArchiveCardProps) {
   return (
     <Link href={`/entry/${entry.id}`} className="block group">
       <div
@@ -21,7 +22,7 @@ export function ArchiveCard({ entry }: ArchiveCardProps) {
       >
         <div className="flex gap-4 lg:flex-col lg:gap-5">
           {/* サムネイル */}
-          <div className="relative w-20 h-20 flex-shrink-0 bg-[#F5F4F0] rounded-sm overflow-hidden lg:w-full lg:h-48 lg:aspect-[4/3]">
+          <div className="relative w-20 h-20 flex-shrink-0 bg-[#F5F4F0] rounded-sm overflow-hidden lg:w-full lg:h-48 lg:aspect-[16/10]">
             <Image
               src={entry.image}
               alt="Entry thumbnail"
@@ -41,13 +42,13 @@ export function ArchiveCard({ entry }: ArchiveCardProps) {
 
           {/* コンテンツ */}
           <div className="flex-1 flex flex-col justify-between min-w-0 lg:gap-4">
-            <p className="text-[14px] lg:text-[15px] leading-[1.6] lg:leading-[1.8] text-[#3D3D3A] tracking-wide truncate lg:line-clamp-2">
+            <p className="text-[14px] lg:text-[16px] leading-[1.6] lg:leading-[1.8] text-[#3D3D3A] tracking-wide truncate lg:line-clamp-2">
               {entry.text}
             </p>
 
             {/* メタデータ */}
             <div className="flex items-center justify-between mt-3 lg:mt-0">
-              <div className="flex items-center gap-3 text-[11px] lg:text-[12px] text-[#9B9890] tracking-wide">
+              <div className="flex items-center gap-3 text-[11px] lg:text-[13px] text-[#9B9890] tracking-wide">
                 <span>{entry.date}</span>
                 <span className="text-[#D4CFC3]">·</span>
                 <span>{entry.temperature} °C</span>
@@ -65,7 +66,7 @@ export function ArchiveCard({ entry }: ArchiveCardProps) {
             </div>
 
             {/* タグ */}
-            <TagList tags={entry.tags} />
+            <TagList tags={entry.tags} onTagClick={onTagClick} />
           </div>
         </div>
       </div>

@@ -59,10 +59,13 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
           {/* 戻るボタン機能付きのヘッダー */}
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-[#9B9890] hover:text-[#3D3D3A] transition-colors group"
+            className="flex items-center gap-2 text-[#3D3D3A] hover:text-[#9B9890] transition-colors group"
+            aria-label="Back to Archive"
           >
-            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            <h1 className="text-[13px] tracking-[0.15em] uppercase">一覧へ</h1>
+            <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />
+            <span className="text-[11px] tracking-[0.15em] uppercase" style={{ fontWeight: 400 }}>
+              一覧へ
+            </span>
           </button>
         </div>
       </div>
@@ -94,7 +97,7 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
 
             {/* 左: ユーザー情報 */}
             <div className="flex items-center gap-3">
-              <div className="relative w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
+              <div className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
                 {entry.user.userImage ? (
                   <Image
                     src={entry.user.userImage}
@@ -106,13 +109,13 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
                   <div className="w-full h-full bg-[#D4CFC3]" />
                 )}
               </div>
-              <span className="text-[13px] lg:text-[14px] text-[#9B9890] tracking-wide font-normal">
+              <span className="text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide font-normal">
                 {entry.user.displayName}
               </span>
             </div>
 
             {/* 右: 日付・天気・アクションボタン */}
-            <div className="flex items-center gap-3 text-[13px] lg:text-[14px] text-[#9B9890] tracking-wide">
+            <div className="flex items-center gap-3 text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide">
               <span>{entry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
               <span>{entry.temperature}°C / {entry.weather}</span>
@@ -144,17 +147,18 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
                     <AlertDialogFooter className="mt-6 gap-3 sm:gap-2">
                       {/* キャンセルボタン: 背景透明、枠線あり、文字はグレー */}
                       <AlertDialogCancel
-                        className="border-[#D4CFC3] text-[#9B9890] hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50 bg-transparent text-[13px] tracking-wide h-10 px-6 rounded-sm transition-colors"
+                        className="border-[#D4CFC3] text-[#9B9890] hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50 bg-transparent text-[13px] tracking-[0.08em] h-10 px-6 rounded-sm transition-all"
+                        style={{ fontWeight: 400 }}
                       >
                         キャンセル
                       </AlertDialogCancel>
 
                       {/* 削除ボタン: AWAIのDestructiveカラー(#C5A088)を使用 */}
-                      {/* hover時に少し濃くして「押せる感」と「警告感」を出す */}
                       <AlertDialogAction
                         onClick={handleDelete}
                         disabled={isPending}
-                        className="bg-[#C5A088] hover:bg-[#B08D75] text-white border-none text-[13px] tracking-wide h-10 px-6 rounded-sm shadow-sm transition-colors"
+                        className="bg-[#C5A088] hover:opacity-80 text-[#FAFAF8] border-none text-[13px] tracking-[0.08em] h-10 px-6 rounded-sm shadow-sm transition-all hover:shadow-md"
+                        style={{ fontWeight: 400 }}
                       >
                         {isPending ? '処理中...' : '削除する'}
                       </AlertDialogAction>
@@ -181,7 +185,7 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
           {/* テキストコンテンツ */}
           <div className="flex-1 space-y-6 lg:space-y-10 mt-8 lg:mt-12 lg:px-4">
             <p
-              className="text-[15px] lg:text-[18px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl"
+              className="text-[15px] lg:text-[20px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl"
               style={{ fontWeight: 400 }}
             >
               {entry.text}
@@ -193,7 +197,7 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
                 {entry.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[12px] tracking-wider rounded-full transition-colors hover:bg-[#D4CFC3]/30"
+                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[13px] tracking-wider rounded-full transition-colors hover:bg-[#D4CFC3]/30"
                     style={{ fontWeight: 400 }}
                   >
                     #{tag}

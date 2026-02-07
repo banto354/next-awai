@@ -27,14 +27,14 @@ export function LandingPage() {
         </div>
 
         {/* Enterボタン（App.tsxの handleEnterApp に相当） */}
-        <Link 
-          href="/stream" 
-          className="group relative px-8 py-3 overflow-hidden rounded-full transition-all hover:shadow-md"
+        <Link
+          href="/stream"
+          className="group relative px-8 lg:px-12 py-2.5 lg:py-3 overflow-hidden rounded-sm transition-all hover:shadow-md"
         >
           <div className="absolute inset-0 bg-[#E8E6E0] group-hover:bg-[#D4CFC3] transition-colors duration-500" />
           <div className="relative flex items-center gap-3 text-[#3D3D3A]">
-            <PenLine className="w-4 h-4" strokeWidth={1.5} />
-            <span className="text-[11px] tracking-[0.2em] uppercase">Enter</span>
+            <PenLine className="w-4 h-4 lg:w-5 lg:h-5" strokeWidth={1.5} />
+            <span className="text-[11px] tracking-[0.2em] uppercase" style={{ fontWeight: 400 }}>Enter</span>
           </div>
         </Link>
       </div>

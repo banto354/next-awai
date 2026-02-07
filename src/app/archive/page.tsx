@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { ArchiveEntry } from "../types/entry";
 import { getWeatherLabel } from "@/lib/weatherUtils";
+import { formatDateJapanese } from "@/lib/dateUtils";
 
 export default async function ArchivePage() {
     // 認証チェック
@@ -34,7 +35,7 @@ export default async function ArchivePage() {
         id: post.id,
         image: post.imageUrl || "", // nullの場合は空文字などでフォールバック
         text: post.content,
-        date: post.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" }), // "Jan 11" のような形式に
+        date: formatDateJapanese(post.createdAt),
         weather: post.weatherId ? getWeatherLabel(post.weatherId) : "天気不明",
         weatherId: post.weatherId ?? 0,
         temperature: Math.round(post.temp ?? 0), // nullの場合は0

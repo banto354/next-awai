@@ -12,8 +12,8 @@ import { getWeatherLabel } from '@/lib/weatherUtils';
 // 初期状態（ローディング中など）
 const LOADING_ENTRY: StreamEntry = {
   id: 'loading',
-  text: 'Loading nearby thoughts...',
-  image: '/images/placeholder.png',
+  text: '読み込み中...',
+  image: '',
   date: '',
   weather: '',
   weatherId: 0,
@@ -111,9 +111,29 @@ export function StreamScreen() {
   const isBookmarked = bookmarkedIds.has(currentEntry.id);
 
   if (loading && entries.length === 0) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8] text-[#9B9890]">
-      読み込み中...
-    </div>;
+    return (
+      <div className="min-h-screen flex flex-col bg-[#FAFAF8]">
+        {/* ヘッダー */}
+        <div className="px-6 pt-12 pb-8 lg:px-16 lg:pt-16 lg:pb-12">
+          <div className="flex items-center justify-between lg:max-w-4xl lg:mx-auto">
+            <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">
+              Stream
+            </h1>
+          </div>
+        </div>
+
+        {/* 画像エリアと同じ大きさのローディング枠 */}
+        <div className="flex-1 px-6 pb-8 lg:px-16 lg:pb-16">
+          <div className="lg:max-w-4xl lg:mx-auto w-full">
+            <div className="w-full aspect-[16/10] bg-[#F5F4F0] rounded-sm flex items-center justify-center lg:shadow-lg">
+              <span className="text-[#9B9890] text-[14px] lg:text-[15px] tracking-wide animate-pulse">
+                読み込み中...
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // データが0件の場合の表示
@@ -167,7 +187,7 @@ export function StreamScreen() {
             {/* 左: ユーザー情報 */}
             <div className="flex items-center gap-3">
               {/* アバター */}
-              <div className="relative w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
+              <div className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
                 {currentEntry.user.userImage ? (
                   <Image
                     src={currentEntry.user.userImage}
@@ -180,13 +200,13 @@ export function StreamScreen() {
                 )}
               </div>
               {/* ユーザー名 */}
-              <span className="text-[13px] lg:text-[14px] text-[#9B9890] tracking-wide font-normal">
+              <span className="text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide font-normal">
                 {currentEntry.user.displayName}
               </span>
             </div>
 
             {/* 右: 日付と天気 */}
-            <div className="flex items-center gap-3 text-[13px] lg:text-[14px] text-[#9B9890] tracking-wide">
+            <div className="flex items-center gap-3 text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide">
               <span>{currentEntry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
               <span>{currentEntry.temperature}°C / {currentEntry.weather}</span>
@@ -195,7 +215,7 @@ export function StreamScreen() {
 
           {/* テキスト */}
           <div className="flex-1 space-y-6 lg:space-y-10 mt-8 lg:mt-12 lg:px-4">
-            <p className="text-[15px] lg:text-[18px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl font-normal whitespace-pre-wrap">
+            <p className="text-[15px] lg:text-[20px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl font-normal whitespace-pre-wrap">
               {currentEntry.text}
             </p>
 
@@ -205,9 +225,9 @@ export function StreamScreen() {
                 {currentEntry.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[12px] tracking-wider rounded-full"
+                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[13px] tracking-wider rounded-full"
                   >
-                    {tag}
+                    # {tag}
                   </span>
                 ))}
               </div>
@@ -216,39 +236,39 @@ export function StreamScreen() {
 
           {/* ナビゲーションコントロール */}
           <div className="flex items-center justify-between mt-8 lg:justify-center lg:gap-32 lg:mt-12">
-        <button
-          onClick={handlePrevious}
-          className="p-3 lg:p-4 text-[#A8A89E] transition-all hover:text-[#3D3D3A] hover:scale-110"
-          aria-label="Previous entry"
-        >
-          <ChevronLeft className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
-        </button>
+            <button
+              onClick={handlePrevious}
+              className="p-3 lg:p-4 text-[#A8A89E] transition-all hover:text-[#3D3D3A] hover:scale-110"
+              aria-label="Previous entry"
+            >
+              <ChevronLeft className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
+            </button>
 
-        {/* ブックマークアイコン */}
-        <button
-          onClick={toggleBookmark}
-          className="relative transition-all group"
-          aria-label="Bookmark this entry"
-        >
-          <Bookmark
-            className="w-6 h-6 lg:w-8 lg:h-8 transition-all group-hover:scale-110"
-            strokeWidth={1.5}
-            fill={isBookmarked ? '#C5A088' : 'none'}
-            stroke={isBookmarked ? '#C5A088' : '#A8A89E'}
-          />
-          {/* Desktop hover tooltip */}
-          <span className="hidden lg:block absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#3D3D3A] text-white text-[11px] tracking-wide rounded-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-            {isBookmarked ? 'ブックマークを外す' : 'ブックマークする'}
-          </span>
-        </button>
+            {/* ブックマークアイコン */}
+            <button
+              onClick={toggleBookmark}
+              className="relative transition-all group"
+              aria-label="Bookmark this entry"
+            >
+              <Bookmark
+                className="w-6 h-6 lg:w-8 lg:h-8 transition-all group-hover:scale-110"
+                strokeWidth={1.5}
+                fill={isBookmarked ? '#C5A088' : 'none'}
+                stroke={isBookmarked ? '#C5A088' : '#A8A89E'}
+              />
+              {/* Desktop hover tooltip */}
+              <span className="hidden lg:block absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#3D3D3A] text-white text-[11px] tracking-wide rounded-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                {isBookmarked ? 'ブックマークを外す' : 'ブックマークする'}
+              </span>
+            </button>
 
-        <button
-          onClick={handleNext}
-          className="p-3 lg:p-4 text-[#A8A89E] transition-all hover:text-[#3D3D3A] hover:scale-110"
-          aria-label="Next entry"
-        >
-          <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
-        </button>
+            <button
+              onClick={handleNext}
+              className="p-3 lg:p-4 text-[#A8A89E] transition-all hover:text-[#3D3D3A] hover:scale-110"
+              aria-label="Next entry"
+            >
+              <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
+            </button>
           </div>
 
           {/* Privacy Indicator - Subtle */}

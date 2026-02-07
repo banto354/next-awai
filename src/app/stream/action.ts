@@ -7,24 +7,25 @@ import { auth } from '@clerk/nextjs/server';
 import { StreamEntry } from '@/app/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
 import { Prisma } from '@prisma/client';
+import { formatDateTimeJapanese } from '@/lib/dateUtils';
 
 // 取得する投稿数
 const LIMIT = 10;
 
 export async function getStreamPostsAction(
-    latitude?: number,
-    longitude?: number
+  latitude?: number,
+  longitude?: number
 ): Promise<StreamEntry[]> {
-    const { userId } = await auth();
+  const { userId } = await auth();
 
-    // 基本的なWHERE条件（公開済み かつ 自分の投稿以外）
-    let posts: any[];
+  // 基本的なWHERE条件（公開済み かつ 自分の投稿以外）
+  let posts: any[];
 
-    try {
-        // --- 位置情報がある場合：距離を考慮したランダム取得 ---
-        // PostGISを使わない簡易的な距離計算（三平方の定理の近似）とランダムソート
-        // ORDER BY (距離係数 * 距離) + (ランダム係数 * RANDOM()) のようなイメージ
-        const commonSelect = Prisma.sql`
+  try {
+    // --- 位置情報がある場合：距離を考慮したランダム取得 ---
+    // PostGISを使わない簡易的な距離計算（三平方の定理の近似）とランダムソート
+    // ORDER BY (距離係数 * 距離) + (ランダム係数 * RANDOM()) のようなイメージ
+    const commonSelect = Prisma.sql`
           p.id,
           p.content,
           p.image_url,
@@ -48,9 +49,9 @@ export async function getStreamPostsAction(
           ) AS is_bookmarked
              `;
 
-        //   -- 簡易距離計算 
-        if (latitude && longitude) {
-            posts = await prisma.$queryRaw`
+    //   -- 簡易距離計算 
+    if (latitude && longitude) {
+      posts = await prisma.$queryRaw`
         SELECT 
           ${commonSelect},
           (POWER(p.latitude - ${latitude}, 2) + POWER(p.longitude - ${longitude}, 2)) as distance_score
@@ -65,9 +66,9 @@ export async function getStreamPostsAction(
           (POWER(p.latitude - ${latitude}, 2) + POWER(p.longitude - ${longitude}, 2)) * 1000 + RANDOM() * 5
         LIMIT ${LIMIT};
       `;
-        } else {
-            // --- 位置情報がない場合：純粋なランダム ---
-            posts = await prisma.$queryRaw`
+    } else {
+      // --- 位置情報がない場合：純粋なランダム ---
+      posts = await prisma.$queryRaw`
         SELECT 
           ${commonSelect}
         FROM "posts" p
@@ -77,35 +78,31 @@ export async function getStreamPostsAction(
         ORDER BY RANDOM()
         LIMIT ${LIMIT};
       `;
-        }
-        console.log(posts);
-        // 取得した生データを整形して返す
-        return posts.map((post: any) => ({
-            id: post.id,
-            image: post.image_url || '',
-            text: post.content,
-            date: new Date(post.created_at).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-            }),
-            weather: getWeatherLabel(post.weather_id),
-            weatherId: post.weather_id,
-            temperature: post.temp,
-            tags: post.tags_json || [],
-            isPublic: true,
-            latitude: post.latitude,
-            longitude: post.longitude,
-            isBookmarked: post.is_bookmarked ?? false,
-            user: {
-                userName: post.userName,
-                displayName: post.display_name || post.userName,
-                userImage: post.user_image || '',
-            }
-        }));
-
-    } catch (error) {
-        console.error("Stream fetch error:", error);
-        return [];
     }
+    console.log(posts);
+    // 取得した生データを整形して返す
+    return posts.map((post: any) => ({
+      id: post.id,
+      image: post.image_url || '',
+      text: post.content,
+      date: formatDateTimeJapanese(new Date(post.created_at)),
+      weather: getWeatherLabel(post.weather_id),
+      weatherId: post.weather_id,
+      temperature: post.temp,
+      tags: post.tags_json || [],
+      isPublic: true,
+      latitude: post.latitude,
+      longitude: post.longitude,
+      isBookmarked: post.is_bookmarked ?? false,
+      user: {
+        userName: post.userName,
+        displayName: post.display_name || post.userName,
+        userImage: post.user_image || '',
+      }
+    }));
+
+  } catch (error) {
+    console.error("Stream fetch error:", error);
+    return [];
+  }
 }

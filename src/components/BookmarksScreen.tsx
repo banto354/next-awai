@@ -68,7 +68,7 @@ export function BookmarksScreen({ bookmarkedEntries }: BookmarksScreenProps) {
       {/* Subtle End Marker */}
       {bookmarkedEntries.length > 0 && (
         <div className="px-6 pt-12 flex justify-center lg:pt-16">
-          <div className="text-[10px] lg:text-[11px] text-[#9B9890] tracking-[0.2em] uppercase">
+          <div className="text-[10px] lg:text-[12px] text-[#9B9890] tracking-[0.2em] uppercase">
             End of saved moments
           </div>
         </div>
