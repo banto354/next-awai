@@ -5,12 +5,13 @@ import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/lib/cropImage';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import { ImagePlus, CloudRain, Lock, Globe, X, AlertCircle } from 'lucide-react';
+import { ImagePlus, Lock, Globe, X, AlertCircle, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, Snowflake } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { addPostAction } from '@/app/compose/action';
 import { useLocationWeather } from '@/hooks/useLocationWeather';
 import imageCompression from 'browser-image-compression';
+import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 
 // バリデーション定数（action.tsと同期）
 const MAX_TEXT_LENGTH = 50;
@@ -282,9 +283,22 @@ export function ComposeScreen() {
               <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">AWAI</h1>
             </div>
             <div className="flex items-center gap-2 text-[#A8A89E]">
-              <CloudRain className="w-4 h-4" />
-              {/* 気候情報取得要 */}
-              <span className="text-[13px] tracking-wide">{weather?.temp}°C / {weather?.description}</span>
+              {/* 天気アイコン */}
+              {(() => {
+                const iconName = getWeatherIconName(weather?.weatherId ?? null);
+                const iconProps = { className: "w-4 h-4", strokeWidth: 1.5 };
+                const icons: Record<WeatherIconName, React.ReactNode> = {
+                  Sun: <Sun {...iconProps} />,
+                  Cloud: <Cloud {...iconProps} />,
+                  CloudRain: <CloudRain {...iconProps} />,
+                  CloudDrizzle: <CloudDrizzle {...iconProps} />,
+                  CloudLightning: <CloudLightning {...iconProps} />,
+                  CloudFog: <CloudFog {...iconProps} />,
+                  Snowflake: <Snowflake {...iconProps} />,
+                };
+                return icons[iconName];
+              })()}
+              <span className="text-[13px] tracking-wide">{weather?.temp}°C</span>
             </div>
           </div>
         </div>
@@ -333,8 +347,22 @@ export function ComposeScreen() {
 
           {/* デスクトップ時の天気表示 */}
           <div className="hidden lg:flex items-center gap-3 text-[#7A7A70] mt-6">
-            <CloudRain className="w-5 h-5" />
-            <span className="text-[15px] font-medium tracking-wide">{weather?.temp}°C / {weather?.description}</span>
+            {/* 天気アイコン */}
+            {(() => {
+              const iconName = getWeatherIconName(weather?.weatherId ?? null);
+              const iconProps = { className: "w-5 h-5", strokeWidth: 1.5 };
+              const icons: Record<WeatherIconName, React.ReactNode> = {
+                Sun: <Sun {...iconProps} />,
+                Cloud: <Cloud {...iconProps} />,
+                CloudRain: <CloudRain {...iconProps} />,
+                CloudDrizzle: <CloudDrizzle {...iconProps} />,
+                CloudLightning: <CloudLightning {...iconProps} />,
+                CloudFog: <CloudFog {...iconProps} />,
+                Snowflake: <Snowflake {...iconProps} />,
+              };
+              return icons[iconName];
+            })()}
+            <span className="text-[15px] font-medium tracking-wide">{weather?.temp}°C</span>
           </div>
         </div>
 

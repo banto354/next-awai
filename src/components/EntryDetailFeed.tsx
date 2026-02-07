@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Bookmark, ChevronLeft, Trash2 } from 'lucide-react'; // 戻るボタン用にChevronLeftを追加
+import { Bookmark, ChevronLeft, Trash2, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, CloudSun, Snowflake } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Entry } from '@/app/types/entry';
+import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"; // コンポーネントのパスは環境に合わせて調整してください
+} from "@/components/ui/alert-dialog";
 import { deletePostAction } from '@/app/compose/action';
 import { toggleBookmarkAction } from '@/app/bookmarks/action';
 
@@ -108,7 +109,22 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
             <div className="flex items-center gap-3 text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide">
               <span>{entry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
-              <span>{entry.temperature}°C / {entry.weather}</span>
+              {/* 天気アイコン */}
+              {(() => {
+                const iconName = getWeatherIconName(entry.weatherId);
+                const iconProps = { className: "w-4 h-4", strokeWidth: 1.5 };
+                const icons: Record<WeatherIconName, React.ReactNode> = {
+                  Sun: <Sun {...iconProps} />,
+                  Cloud: <Cloud {...iconProps} />,
+                  CloudRain: <CloudRain {...iconProps} />,
+                  CloudDrizzle: <CloudDrizzle {...iconProps} />,
+                  CloudLightning: <CloudLightning {...iconProps} />,
+                  CloudFog: <CloudFog {...iconProps} />,
+                  Snowflake: <Snowflake {...iconProps} />,
+                };
+                return icons[iconName];
+              })()}
+              <span>{entry.temperature}°C</span>
             </div>
 
             {/* 右: アイコン */}
