@@ -73,6 +73,18 @@ export function ComposeScreen() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null); // 切り抜き範囲(pixel)
   const [tempImgSrc, setTempImgSrc] = useState<string | null>(null); // 一時的に切り抜いた画像
   const [isCropOpen, setIsCropOpen] = useState(false); // トリミングが開いているかどうか
+  const [showError, setShowError] = useState(false); // エラー表示のタイマー管理用
+
+  // エラー表示のタイマー（3秒後に自動消去）
+  useEffect(() => {
+    if (formState.error) {
+      setShowError(true);
+      const timer = setTimeout(() => {
+        setShowError(false);
+      }, 3000); // 3秒後に消える
+      return () => clearTimeout(timer);
+    }
+  }, [formState]); // formState全体を監視して、同じエラーでも再トリガーされるように
 
   // バリデーション警告を計算
   const validationWarnings = useMemo(() => {
@@ -384,20 +396,25 @@ export function ComposeScreen() {
 
           </div>
         </div>
-        {formState.error && (
-          <div className="fixed bottom-24 left-6 right-6 z-50 animate-in slide-in-from-bottom-2 bg-red-50/95 backdrop-blur-md border border-red-100 px-4 py-3 rounded-sm shadow-sm lg:bottom-10 lg:left-auto lg:right-10 lg:translate-x-0 lg:w-auto lg:min-w-[300px] lg:rounded-md">
-            <div className="flex items-center justify-center gap-2">
-              {/* 警告アイコン */}
-              <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <p className="text-red-600 text-[12px] font-medium tracking-wide">
-                {typeof formState.error === 'string' ? formState.error : "入力内容を確認してください"}
-              </p>
-            </div>
-          </div>
-        )}
       </form>
+
+      {/* エラートースト（formの外に配置してfixedが正しく動作するように） */}
+      <div
+        className={`fixed bottom-28 left-4 right-4 z-[100] bg-red-50/95 backdrop-blur-md border border-red-100 px-4 py-3 rounded-lg shadow-lg lg:bottom-10 lg:left-auto lg:right-10 lg:w-auto lg:min-w-[300px] transition-all duration-300 ${formState.error && showError
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-2 pointer-events-none'
+          }`}
+      >
+        <div className="flex items-center justify-center gap-2">
+          {/* 警告アイコン */}
+          <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <p className="text-red-600 text-[12px] font-medium tracking-wide">
+            {typeof formState.error === 'string' ? formState.error : "入力内容を確認してください"}
+          </p>
+        </div>
+      </div>
       {/* トリミング用モーダル */}
       <Dialog open={isCropOpen} onOpenChange={setIsCropOpen}>
         <DialogContent className="max-w-[90vw] w-[500px] h-[80vh] flex flex-col p-0 gap-0 overflow-hidden bg-[#FAFAF8]">
