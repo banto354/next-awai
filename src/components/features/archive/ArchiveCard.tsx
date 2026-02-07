@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Lock, Globe } from 'lucide-react';
+import { Lock, Globe, Bookmark } from 'lucide-react';
 import { TagList } from '@/components/ui/tagList';
 import { ArchiveEntry } from '@/app/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
@@ -29,6 +29,14 @@ export function ArchiveCard({ entry }: ArchiveCardProps) {
               sizes="(max-width: 1024px) 80px, (max-width: 1280px) 50vw, 33vw"
               className="object-cover transition-transform lg:group-hover:scale-105"
             />
+            {entry.isBookmarked && (
+              <div className="absolute top-2 right-2 bg-[#FAFAF8]/90 backdrop-blur-sm rounded-sm p-1.5">
+                <Bookmark
+                  className="w-3 h-3 fill-[#D4CFC3] stroke-[#D4CFC3]"
+                  strokeWidth={1.5}
+                />
+              </div>
+            )}
           </div>
 
           {/* コンテンツ */}

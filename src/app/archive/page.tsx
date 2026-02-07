@@ -25,6 +25,9 @@ export default async function ArchivePage() {
                     tag: true,
                 },
             },
+            bookmarkedBy: {
+                where: { userId },
+            },
         },
     });
     const formattedEntries: ArchiveEntry[] = posts.map((post) => ({
@@ -39,6 +42,7 @@ export default async function ArchivePage() {
         isPublic: post.isPublic,
         latitude: post.latitude ?? 0,
         longitude: post.longitude ?? 0,
+        isBookmarked: post.bookmarkedBy.length > 0,
     }));
 
     return <ArchiveScreen initialEntries={formattedEntries} />;
