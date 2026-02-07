@@ -45,7 +45,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         href="/stream"
                         className={`
                             flex flex-col items-center gap-1.5 transition-colors
-                            ${isActive('/stream') || pathname === '/'
+                            ${isActive('/stream')
                                 ? 'text-[#3D3D3A]'
                                 : 'text-[#A8A89E]'
                             }
@@ -97,7 +97,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     <SignedOut>
                         <Link
                             href="/sign-in"
-                            className="flex flex-col items-center gap-1.5 text-[#A8A89E]"
+                            className={`
+                                flex flex-col items-center gap-1.5 transition-colors
+                                ${isActive('/sign-in')
+                                    ? 'text-[#3D3D3A]'
+                                    : 'text-[#A8A89E]'
+                                }
+                            `}
                             aria-label="Sign In"
                         >
                             <CircleUser className="w-5 h-5" strokeWidth={1.5} />
@@ -112,7 +118,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {/* デスクトップ用ナビゲーション - 上部サイドバー、デスクトップでのみ表示 */}
             <nav className="hidden lg:flex fixed top-0 left-0 h-full w-20 xl:w-24 border-r border-[#D4CFC3]/10 bg-[#F9F8F5]/95 backdrop-blur-sm flex-col items-center py-12 gap-12 z-50">
                 {/* ロゴ */}
-                <Link href="/" className="text-[11px] tracking-[0.2em] uppercase text-[#9B9890] hover:text-[#3D3D3A] transition-colors mb-8">
+                <Link href="/" className={`text-[11px] tracking-[0.2em] uppercase transition-colors mb-8 ${pathname === '/' ? 'text-[#3D3D3A]' : 'text-[#9B9890] hover:text-[#3D3D3A]'}`}>
                     AWAI
                 </Link>
 
@@ -140,7 +146,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         href="/stream"
                         className={`
                             flex flex-col items-center gap-2 transition-all hover:scale-110
-                            ${isActive('/stream') || pathname === '/'
+                            ${isActive('/stream')
                                 ? 'text-[#3D3D3A]'
                                 : 'text-[#A8A89E]'
                             }
@@ -186,7 +192,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     <SignedOut>
                         <Link
                             href="/sign-in"
-                            className="flex flex-col items-center gap-1.5 text-[#A8A89E]"
+                            className={`
+                                flex flex-col items-center gap-1.5 transition-all hover:scale-110
+                                ${isActive('/sign-in')
+                                    ? 'text-[#3D3D3A]'
+                                    : 'text-[#A8A89E]'
+                                }
+                            `}
                             aria-label="Sign In"
                         >
                             <CircleUser className="w-5 h-5" strokeWidth={1.5} />
@@ -207,7 +219,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         className="w-1 h-1 rounded-full mx-auto transition-all"
                         style={{
                             backgroundColor: '#D4CFC3',
-                            opacity: isActive('/stream') || pathname === '/' ? 1 : 0
+                            opacity: isActive('/stream') ? 1 : 0
                         }}
                     />
                     <div
