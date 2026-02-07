@@ -59,10 +59,13 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
           {/* 戻るボタン機能付きのヘッダー */}
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-[#9B9890] hover:text-[#3D3D3A] transition-colors group"
+            className="flex items-center gap-2 text-[#3D3D3A] hover:text-[#9B9890] transition-colors group"
+            aria-label="Back to Archive"
           >
-            <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            <h1 className="text-[13px] tracking-[0.15em] uppercase">一覧へ</h1>
+            <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" strokeWidth={1.5} />
+            <span className="text-[11px] tracking-[0.15em] uppercase" style={{ fontWeight: 400 }}>
+              一覧へ
+            </span>
           </button>
         </div>
       </div>
@@ -144,17 +147,18 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
                     <AlertDialogFooter className="mt-6 gap-3 sm:gap-2">
                       {/* キャンセルボタン: 背景透明、枠線あり、文字はグレー */}
                       <AlertDialogCancel
-                        className="border-[#D4CFC3] text-[#9B9890] hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50 bg-transparent text-[13px] tracking-wide h-10 px-6 rounded-sm transition-colors"
+                        className="border-[#D4CFC3] text-[#9B9890] hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50 bg-transparent text-[13px] tracking-[0.08em] h-10 px-6 rounded-sm transition-all"
+                        style={{ fontWeight: 400 }}
                       >
                         キャンセル
                       </AlertDialogCancel>
 
                       {/* 削除ボタン: AWAIのDestructiveカラー(#C5A088)を使用 */}
-                      {/* hover時に少し濃くして「押せる感」と「警告感」を出す */}
                       <AlertDialogAction
                         onClick={handleDelete}
                         disabled={isPending}
-                        className="bg-[#C5A088] hover:bg-[#B08D75] text-white border-none text-[13px] tracking-wide h-10 px-6 rounded-sm shadow-sm transition-colors"
+                        className="bg-[#C5A088] hover:opacity-80 text-[#FAFAF8] border-none text-[13px] tracking-[0.08em] h-10 px-6 rounded-sm shadow-sm transition-all hover:shadow-md"
+                        style={{ fontWeight: 400 }}
                       >
                         {isPending ? '処理中...' : '削除する'}
                       </AlertDialogAction>

@@ -81,7 +81,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                 ? 'text-[#3D3D3A]'
                                 : 'text-[#A8A89E]'
                             }
-                    }
                     `}
                         aria-label="Bookmarks"
                     >

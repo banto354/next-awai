@@ -289,19 +289,16 @@ export function ComposeScreen() {
                 />
                 {/* 確定したタグの表示 */}
                 {tagList.map((tag) => (
-                  <span
+                  <button
                     key={tag}
-                    className="flex items-center gap-1 bg-[#E8E6E0] text-[#A8A89E] px-3 py-1 rounded-full text-[13px] transition-colors hover:bg-[#D4CFC3]/50"
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="group px-3.5 py-1.5 lg:px-4 lg:py-2 bg-[#E8E6E0]/80 hover:bg-[#D4CFC3]/60 text-[#3D3D3A] text-[12px] lg:text-[13px] tracking-wide rounded-full transition-all hover:shadow-sm flex items-center gap-1.5 animate-fadeIn"
+                    style={{ fontWeight: 400 }}
                   >
-                    #{tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="hover:text-[#3D3D3A]"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
+                    <span>#{tag}</span>
+                    <X className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-[#A8A89E] group-hover:text-[#3D3D3A] transition-colors" strokeWidth={2} />
+                  </button>
                 ))}
               </div>
               {/* サーバー送信用の隠しフィールド */}
@@ -396,13 +393,15 @@ export function ComposeScreen() {
             <DialogFooter className="flex-row gap-2 sm:gap-2">
               <button
                 onClick={() => setIsCropOpen(false)}
-                className="flex-1 py-2 text-[#9B9890] text-sm border border-[#D4CFC3] rounded-sm"
+                className="flex-1 py-2.5 border border-[#D4CFC3] text-[#9B9890] text-[13px] lg:text-[14px] tracking-[0.08em] rounded-sm transition-all hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50"
+                style={{ fontWeight: 400 }}
               >
                 キャンセル
               </button>
               <button
                 onClick={handleCropConfirm}
-                className="flex-1 py-2 bg-[#706B5F] text-[#FAFAF8] text-sm rounded-sm"
+                className="flex-1 py-2.5 bg-[#D4CFC3] text-[#3D3D3A] text-[13px] lg:text-[14px] tracking-[0.08em] rounded-sm transition-all hover:opacity-80 hover:shadow-md"
+                style={{ fontWeight: 400 }}
               >
                 完了
               </button>
