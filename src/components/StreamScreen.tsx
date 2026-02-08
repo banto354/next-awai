@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useTransition } from 'react';
-import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Bookmark, ChevronLeft, ChevronRight, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, Snowflake } from 'lucide-react';
 import Image from 'next/image';
 import { mockEntries } from '@/app/data/mockEntries';
 import { getStreamPostsAction } from '@/app/stream/action';
 import { toggleBookmarkAction } from '@/app/bookmarks/action';
 import { StreamEntry } from '@/app/types/entry';
-import { getWeatherLabel } from '@/lib/weatherUtils';
+import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 
 // 初期状態（ローディング中など）
 const LOADING_ENTRY: StreamEntry = {
@@ -181,7 +181,7 @@ export function StreamScreen() {
             )}
           </div>
 
-          {/* メタデータ行 (ユーザー左 / 日付右) */}
+          {/* メタデータ行 (ユーザー左 / 日付・天気右) */}
           <div className="flex items-center justify-between mt-8 lg:mt-12 lg:px-4">
 
             {/* 左: ユーザー情報 */}
@@ -200,16 +200,31 @@ export function StreamScreen() {
                 )}
               </div>
               {/* ユーザー名 */}
-              <span className="text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide font-normal">
+              <span className="text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide font-normal max-w-[120px] lg:max-w-[180px] truncate">
                 {currentEntry.user.displayName}
               </span>
             </div>
 
-            {/* 右: 日付と天気 */}
+            {/* 右: 日付・天気 */}
             <div className="flex items-center gap-3 text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide">
               <span>{currentEntry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
-              <span>{currentEntry.temperature}°C / {currentEntry.weather}</span>
+              {/* 天気アイコン */}
+              {(() => {
+                const iconName = getWeatherIconName(currentEntry.weatherId);
+                const iconProps = { className: "w-4 h-4", strokeWidth: 1.5 };
+                const icons: Record<WeatherIconName, React.ReactNode> = {
+                  Sun: <Sun {...iconProps} />,
+                  Cloud: <Cloud {...iconProps} />,
+                  CloudRain: <CloudRain {...iconProps} />,
+                  CloudDrizzle: <CloudDrizzle {...iconProps} />,
+                  CloudLightning: <CloudLightning {...iconProps} />,
+                  CloudFog: <CloudFog {...iconProps} />,
+                  Snowflake: <Snowflake {...iconProps} />,
+                };
+                return icons[iconName];
+              })()}
+              <span>{currentEntry.temperature}°C</span>
             </div>
           </div>
 
