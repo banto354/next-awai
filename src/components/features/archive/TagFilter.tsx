@@ -4,14 +4,12 @@ interface TagFilterProps {
     active: boolean;
     tag: string;
     onClick: () => void;
-    hasMatches: boolean;
 }
 
 export function TagFilter({
     active,
     tag,
     onClick,
-    hasMatches,
 }: TagFilterProps) {
     if (!active) return null;
 
@@ -29,13 +27,6 @@ export function TagFilter({
                 <span>#{tag}</span>
                 <X className="w-3.5 h-3.5 lg:w-4 lg:h-4 ml-1" strokeWidth={2} />
             </button>
-
-            {/* 該当なしメッセージ */}
-            {!hasMatches && (
-                <p className="mt-3 text-[11px] text-[#9B9890] tracking-wide animate-in fade-in duration-500">
-                    このタグの投稿はありません
-                </p>
-            )}
         </div>
     );
 }

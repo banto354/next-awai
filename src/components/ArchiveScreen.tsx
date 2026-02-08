@@ -6,6 +6,7 @@ import { TemperatureFilter } from './features/archive/TemperatureFilter';
 import { TagFilter } from './features/archive/TagFilter';
 import { ArchiveEntry } from '@/app/types/entry';
 import { getArchivePostsAction } from '@/app/archive/action';
+import { useLocationWeather } from '@/hooks/useLocationWeather';
 
 // Propsの定義
 interface ArchiveScreenProps {
@@ -22,7 +23,8 @@ export function ArchiveScreen({ initialEntries, initialCursor, initialHasMore }:
 
   const [tempFilterActive, setTempFilterActive] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const currentTemp = 10;
+  const { weather, loading: weatherLoading } = useLocationWeather();
+  const currentTemp = weather?.temp ?? null;
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -58,7 +60,7 @@ export function ArchiveScreen({ initialEntries, initialCursor, initialHasMore }:
 
   // フィルタリングロジック
   const filteredEntries = entries.filter((entry) => {
-    const tempMatch = tempFilterActive ? entry.temperature === currentTemp : true;
+    const tempMatch = tempFilterActive && currentTemp !== null ? entry.temperature === currentTemp : true;
     const tagMatch = selectedTag ? entry.tags.includes(selectedTag) : true;
     return tempMatch && tagMatch;
   });
@@ -85,8 +87,8 @@ export function ArchiveScreen({ initialEntries, initialCursor, initialHasMore }:
         <TemperatureFilter
           active={tempFilterActive}
           temp={currentTemp}
+          loading={weatherLoading}
           onClick={() => setTempFilterActive(!tempFilterActive)}
-          hasMatches={filteredEntries.length > 0}
         />
       </div>
 
@@ -96,9 +98,19 @@ export function ArchiveScreen({ initialEntries, initialCursor, initialHasMore }:
           active={selectedTag !== null}
           tag={selectedTag || ''}
           onClick={clearTagFilter}
-          hasMatches={filteredEntries.length > 0}
         />
       </div>
+
+      {/* フィルター適用中で該当なしメッセージ */}
+      {(tempFilterActive || selectedTag !== null) && filteredEntries.length === 0 && (
+        <div className="px-6 pb-8 lg:px-16 lg:pb-12">
+          <div className="lg:max-w-7xl lg:mx-auto">
+            <p className="text-[11px] text-[#9B9890] tracking-wide animate-in fade-in duration-500">
+              この条件に重なる投稿はありません
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* 出力投稿 */}
       <div className="space-y-1 lg:space-y-0 lg:px-16">
