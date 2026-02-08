@@ -203,8 +203,13 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
             </div>
           )}
 
+          {/* 仕切り線 */}
+          <div className="mt-6 lg:mt-8 lg:px-4">
+            <div className="h-px bg-[#D4CFC3]/20" />
+          </div>
+
           {/* ユーザー情報 */}
-          <div className="flex items-center gap-3 mt-6 lg:mt-8 lg:px-4">
+          <div className="flex items-center gap-3 mt-4 lg:mt-6 lg:px-4">
             <div className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
               {entry.user.userImage ? (
                 <Image

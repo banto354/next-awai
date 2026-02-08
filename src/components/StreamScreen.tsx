@@ -181,31 +181,16 @@ export function StreamScreen() {
             )}
           </div>
 
-          {/* メタデータ行 (ユーザー左 / 日付・天気右) */}
-          <div className="flex items-center justify-between mt-8 lg:mt-12 lg:px-4">
+          {/* テキスト */}
+          <div className="mt-6 lg:mt-8 lg:px-4">
+            <p className="text-[15px] lg:text-[20px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl font-normal whitespace-pre-wrap">
+              {currentEntry.text}
+            </p>
+          </div>
 
-            {/* 左: ユーザー情報 */}
-            <div className="flex items-center gap-3">
-              {/* アバター */}
-              <div className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
-                {currentEntry.user.userImage ? (
-                  <Image
-                    src={currentEntry.user.userImage}
-                    alt={currentEntry.user.displayName}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-[#D4CFC3]" />
-                )}
-              </div>
-              {/* ユーザー名 */}
-              <span className="text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide font-normal max-w-[120px] lg:max-w-[180px] truncate">
-                {currentEntry.user.displayName}
-              </span>
-            </div>
-
-            {/* 右: 日付・天気 */}
+          {/* メタデータ (日付・天気・気温) + ブックマーク */}
+          <div className="flex items-center justify-between mt-6 lg:mt-8 lg:px-4">
+            {/* 左: 日付・天気・気温 */}
             <div className="flex items-center gap-3 text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide">
               <span>{currentEntry.date}</span>
               <span className="text-[#D4CFC3]">·</span>
@@ -226,27 +211,58 @@ export function StreamScreen() {
               })()}
               <span>{currentEntry.temperature}°C</span>
             </div>
+
+            {/* 右: ブックマークアイコン */}
+            <button
+              onClick={toggleBookmark}
+              className="transition-all hover:scale-110"
+              aria-label="Bookmark this entry"
+            >
+              <Bookmark
+                className="w-5 h-5"
+                strokeWidth={1.5}
+                fill={isBookmarked ? '#C5A088' : 'none'}
+                stroke={isBookmarked ? '#C5A088' : '#A8A89E'}
+              />
+            </button>
           </div>
 
-          {/* テキスト */}
-          <div className="flex-1 space-y-6 lg:space-y-10 mt-8 lg:mt-12 lg:px-4">
-            <p className="text-[15px] lg:text-[20px] leading-[1.9] lg:leading-[2.2] text-[#3D3D3A] tracking-wide lg:max-w-3xl font-normal whitespace-pre-wrap">
-              {currentEntry.text}
-            </p>
+          {/* タグ */}
+          {currentEntry.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 lg:gap-3 mt-4 lg:mt-6 lg:px-4">
+              {currentEntry.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[13px] tracking-wider rounded-full"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
 
-            {/* タグ */}
-            {currentEntry.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 lg:gap-3">
-                {currentEntry.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[13px] tracking-wider rounded-full"
-                  >
-                    # {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+          {/* 仕切り線 */}
+          <div className="mt-6 lg:mt-8 lg:px-4">
+            <div className="h-px bg-[#D4CFC3]/20" />
+          </div>
+
+          {/* ユーザー情報 */}
+          <div className="flex items-center gap-3 mt-4 lg:mt-6 lg:px-4">
+            <div className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-[#E8E6E0] overflow-hidden flex-shrink-0">
+              {currentEntry.user.userImage ? (
+                <Image
+                  src={currentEntry.user.userImage}
+                  alt={currentEntry.user.displayName}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-[#D4CFC3]" />
+              )}
+            </div>
+            <span className="text-[13px] lg:text-[15px] text-[#9B9890] tracking-wide font-normal max-w-[120px] lg:max-w-[180px] truncate">
+              {currentEntry.user.displayName}
+            </span>
           </div>
 
           {/* ナビゲーションコントロール */}
@@ -257,24 +273,6 @@ export function StreamScreen() {
               aria-label="Previous entry"
             >
               <ChevronLeft className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
-            </button>
-
-            {/* ブックマークアイコン */}
-            <button
-              onClick={toggleBookmark}
-              className="relative transition-all group"
-              aria-label="Bookmark this entry"
-            >
-              <Bookmark
-                className="w-6 h-6 lg:w-8 lg:h-8 transition-all group-hover:scale-110"
-                strokeWidth={1.5}
-                fill={isBookmarked ? '#C5A088' : 'none'}
-                stroke={isBookmarked ? '#C5A088' : '#A8A89E'}
-              />
-              {/* Desktop hover tooltip */}
-              <span className="hidden lg:block absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#3D3D3A] text-white text-[11px] tracking-wide rounded-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                {isBookmarked ? 'ブックマークを外す' : 'ブックマークする'}
-              </span>
             </button>
 
             <button
