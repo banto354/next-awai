@@ -149,7 +149,7 @@ export function StreamScreen() {
       <div className="px-6 pt-12 pb-8 lg:px-16 lg:pt-16 lg:pb-12">
         <div className="flex items-center justify-between lg:max-w-4xl lg:mx-auto">
           <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">
-            Stream
+            Stream - 巡り
           </h1>
           <div className="text-[11px] text-[#9B9890] tracking-wider">
             {currentIndex + 1} of {entries.length}

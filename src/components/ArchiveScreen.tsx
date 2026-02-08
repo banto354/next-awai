@@ -78,7 +78,7 @@ export function ArchiveScreen({ initialEntries, initialCursor, initialHasMore }:
       {/* ヘッダー */}
       <div className="px-6 pt-12 pb-6 lg:px-16 lg:pt-16 lg:pb-8">
         <div className="lg:max-w-7xl lg:mx-auto">
-          <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">過去の投稿</h1>
+          <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">LOG - 過去の投稿</h1>
         </div>
       </div>
 

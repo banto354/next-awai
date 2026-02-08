@@ -56,14 +56,10 @@ export function BookmarksScreen({ bookmarkedEntries, initialOffset, initialHasMo
       <div className="px-6 pt-12 pb-6 lg:px-16 lg:pt-16 lg:pb-8">
         <div className="lg:max-w-7xl lg:mx-auto">
           <div className="flex items-center gap-3 mb-2">
-            <Bookmark className="w-5 h-5 text-[#9B9890]" strokeWidth={1.5} />
             <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">
-              栞 Saved Moments
+              BOOKMARK - 栞
             </h1>
           </div>
-          <p className="text-[11px] text-[#A8A89E] tracking-wide">
-            {entries.length} {entries.length === 1 ? 'entry' : 'entries'} marked
-          </p>
         </div>
       </div>
 
@@ -105,7 +101,7 @@ export function BookmarksScreen({ bookmarkedEntries, initialOffset, initialHasMo
             </div>
           ) : (
             <div className="text-[10px] lg:text-[12px] text-[#9B9890] tracking-[0.2em] uppercase">
-              End of saved moments
+              End of saved bookmarks
             </div>
           )}
         </div>
