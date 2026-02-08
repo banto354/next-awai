@@ -1,24 +1,66 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
 import { ArchiveCard } from './features/archive/ArchiveCard';
 import { TemperatureFilter } from './features/archive/TemperatureFilter';
 import { TagFilter } from './features/archive/TagFilter';
 import { ArchiveEntry } from '@/app/types/entry';
+import { getArchivePostsAction } from '@/app/archive/action';
+import { useLocationWeather } from '@/hooks/useLocationWeather';
 
-// Propsの定義（この画面専用の受け皿）
+// Propsの定義
 interface ArchiveScreenProps {
-  initialEntries: ArchiveEntry[]; // ★ArchiveEntry型を使う
+  initialEntries: ArchiveEntry[];
+  initialCursor: string | null;
+  initialHasMore: boolean;
 }
 
-export function ArchiveScreen({ initialEntries }: ArchiveScreenProps) {
+export function ArchiveScreen({ initialEntries, initialCursor, initialHasMore }: ArchiveScreenProps) {
+  const [entries, setEntries] = useState<ArchiveEntry[]>(initialEntries);
+  const [cursor, setCursor] = useState<string | null>(initialCursor);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [isPending, startTransition] = useTransition();
+
   const [tempFilterActive, setTempFilterActive] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const currentTemp = 10; // Mock current temperature
+  const { weather, loading: weatherLoading } = useLocationWeather();
+  const currentTemp = weather?.temp ?? null;
 
-  // フィルタリングロジック：気温とタグの両方を適用
-  const filteredEntries = initialEntries.filter((entry) => {
-    const tempMatch = tempFilterActive ? entry.temperature === currentTemp : true;
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // 追加読み込み
+  const loadMore = useCallback(() => {
+    if (!hasMore || isPending) return;
+
+    startTransition(async () => {
+      const result = await getArchivePostsAction(cursor);
+      setEntries(prev => [...prev, ...result.entries]);
+      setCursor(result.nextCursor);
+      setHasMore(result.hasMore);
+    });
+  }, [cursor, hasMore, isPending]);
+
+  // Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !isPending) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, isPending, loadMore]);
+
+  // フィルタリングロジック
+  const filteredEntries = entries.filter((entry) => {
+    const tempMatch = tempFilterActive && currentTemp !== null ? entry.temperature === currentTemp : true;
     const tagMatch = selectedTag ? entry.tags.includes(selectedTag) : true;
     return tempMatch && tagMatch;
   });
@@ -45,8 +87,8 @@ export function ArchiveScreen({ initialEntries }: ArchiveScreenProps) {
         <TemperatureFilter
           active={tempFilterActive}
           temp={currentTemp}
+          loading={weatherLoading}
           onClick={() => setTempFilterActive(!tempFilterActive)}
-          hasMatches={filteredEntries.length > 0}
         />
       </div>
 
@@ -56,11 +98,21 @@ export function ArchiveScreen({ initialEntries }: ArchiveScreenProps) {
           active={selectedTag !== null}
           tag={selectedTag || ''}
           onClick={clearTagFilter}
-          hasMatches={filteredEntries.length > 0}
         />
       </div>
 
-      {/* 出力投稿　モバイル；リスト、デスクトップ：グリッド */}
+      {/* フィルター適用中で該当なしメッセージ */}
+      {(tempFilterActive || selectedTag !== null) && filteredEntries.length === 0 && (
+        <div className="px-6 pb-8 lg:px-16 lg:pb-12">
+          <div className="lg:max-w-7xl lg:mx-auto">
+            <p className="text-[11px] text-[#9B9890] tracking-wide animate-in fade-in duration-500">
+              この条件に重なる投稿はありません
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 出力投稿 */}
       <div className="space-y-1 lg:space-y-0 lg:px-16">
         <div className="lg:max-w-7xl lg:mx-auto lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
           {filteredEntries.map((entry) => (
@@ -73,11 +125,21 @@ export function ArchiveScreen({ initialEntries }: ArchiveScreenProps) {
         </div>
       </div>
 
-      {/* エンドマーカー */}
-      <div className="px-6 pt-12 flex justify-center lg:pt-16">
-        <div className="text-[10px] lg:text-[12px] text-[#9B9890] tracking-[0.2em] uppercase">
-          {filteredEntries.length} 件の投稿
-        </div>
+      {/* ローディング / 追加読み込みトリガー */}
+      <div ref={loadMoreRef} className="px-6 pt-12 flex justify-center lg:pt-16">
+        {isPending ? (
+          <div className="text-[10px] lg:text-[12px] text-[#9B9890] tracking-[0.2em] uppercase animate-pulse">
+            読み込み中...
+          </div>
+        ) : hasMore ? (
+          <div className="text-[10px] lg:text-[12px] text-[#D4CFC3] tracking-[0.2em] uppercase">
+            スクロールで追加読み込み
+          </div>
+        ) : (
+          <div className="text-[10px] lg:text-[12px] text-[#9B9890] tracking-[0.2em] uppercase">
+            {entries.length} 件の投稿
+          </div>
+        )}
       </div>
     </div>
   );

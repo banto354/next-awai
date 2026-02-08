@@ -1,33 +1,60 @@
 'use client';
 
-import { useState } from 'react';
-import { Bookmark, Lock, Globe } from 'lucide-react';
-import { Entry } from '@/app/types/entry';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
+import { Bookmark } from 'lucide-react';
+import { BookmarkEntry } from '@/app/types/entry';
 import { BookmarkCard } from '@/components/features/bookmarks/BookmarkCard';
-
-// interface BookmarkListProps {
-//   onBack?: () => void;
-//   onEntryClick?: (entryId: string) => void;
-// }
+import { getBookmarkedPostsAction } from '@/app/bookmarks/loadMoreAction';
 
 interface BookmarksScreenProps {
-  bookmarkedEntries: Entry[];
-  // onEntryClick?: (entryId: string) => void;
+  bookmarkedEntries: BookmarkEntry[];
+  initialOffset: number;
+  initialHasMore: boolean;
 }
 
-export function BookmarksScreen({ bookmarkedEntries }: BookmarksScreenProps) {
-  // const [bookmarkedEntries] = useState<Entry[]>(
-  //   bookmarkedEntries.filter(entry => entry.isBookmarked)
-  // );
+export function BookmarksScreen({ bookmarkedEntries, initialOffset, initialHasMore }: BookmarksScreenProps) {
+  const [entries, setEntries] = useState<BookmarkEntry[]>(bookmarkedEntries);
+  const [offset, setOffset] = useState<number>(initialOffset);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [isPending, startTransition] = useTransition();
+
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // 追加読み込み
+  const loadMore = useCallback(() => {
+    if (!hasMore || isPending) return;
+
+    startTransition(async () => {
+      const result = await getBookmarkedPostsAction(offset);
+      setEntries(prev => [...prev, ...result.entries]);
+      setOffset(result.nextOffset);
+      setHasMore(result.hasMore);
+    });
+  }, [offset, hasMore, isPending]);
+
+  // Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !isPending) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, isPending, loadMore]);
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] pb-8 lg:pb-16">
-      {/* Back Button */}
+      {/* ヘッダー */}
       <div className="px-6 pt-12 pb-6 lg:px-16 lg:pt-16 lg:pb-8">
         <div className="lg:max-w-7xl lg:mx-auto">
-          {/* ヘッダー */}
           <div className="flex items-center gap-3 mb-2">
             <Bookmark className="w-5 h-5 text-[#9B9890]" strokeWidth={1.5} />
             <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">
@@ -35,13 +62,13 @@ export function BookmarksScreen({ bookmarkedEntries }: BookmarksScreenProps) {
             </h1>
           </div>
           <p className="text-[11px] text-[#A8A89E] tracking-wide">
-            {bookmarkedEntries.length} {bookmarkedEntries.length === 1 ? 'entry' : 'entries'} marked
+            {entries.length} {entries.length === 1 ? 'entry' : 'entries'} marked
           </p>
         </div>
       </div>
 
       {/* コンテンツ */}
-      {bookmarkedEntries.length === 0 ? (
+      {entries.length === 0 && !isPending ? (
         /* データがない場合 */
         <div className="flex flex-col items-center justify-center py-24 px-6">
           <Bookmark className="w-12 h-12 text-[#D4CFC3] mb-6" strokeWidth={1.5} />
@@ -58,21 +85,32 @@ export function BookmarksScreen({ bookmarkedEntries }: BookmarksScreenProps) {
         /* グリッドレイアウト */
         <div className="px-6 space-y-1 lg:space-y-0 lg:px-16">
           <div className="lg:max-w-7xl lg:mx-auto lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
-            {bookmarkedEntries.map((entry) => (
+            {entries.map((entry) => (
               <BookmarkCard key={entry.id} entry={entry} />
             ))}
           </div>
         </div>
       )}
 
-      {/* Subtle End Marker */}
-      {bookmarkedEntries.length > 0 && (
-        <div className="px-6 pt-12 flex justify-center lg:pt-16">
-          <div className="text-[10px] lg:text-[12px] text-[#9B9890] tracking-[0.2em] uppercase">
-            End of saved moments
-          </div>
+      {/* ローディング / 追加読み込みトリガー */}
+      {entries.length > 0 && (
+        <div ref={loadMoreRef} className="px-6 pt-12 flex justify-center lg:pt-16">
+          {isPending ? (
+            <div className="text-[10px] lg:text-[12px] text-[#9B9890] tracking-[0.2em] uppercase animate-pulse">
+              読み込み中...
+            </div>
+          ) : hasMore ? (
+            <div className="text-[10px] lg:text-[12px] text-[#D4CFC3] tracking-[0.2em] uppercase">
+              スクロールで追加読み込み
+            </div>
+          ) : (
+            <div className="text-[10px] lg:text-[12px] text-[#9B9890] tracking-[0.2em] uppercase">
+              End of saved moments
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
+

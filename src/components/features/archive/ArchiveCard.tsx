@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Lock, Globe, Bookmark } from 'lucide-react';
+import { Lock, Globe, Bookmark, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, Snowflake } from 'lucide-react';
 import { TagList } from '@/components/ui/tagList';
 import { ArchiveEntry } from '@/app/types/entry';
-import { getWeatherLabel } from '@/lib/weatherUtils';
+import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 
 // プロパティの型定義
 interface ArchiveCardProps {
@@ -51,9 +51,22 @@ export function ArchiveCard({ entry, onTagClick }: ArchiveCardProps) {
               <div className="flex items-center gap-3 text-[11px] lg:text-[13px] text-[#9B9890] tracking-wide">
                 <span>{entry.date}</span>
                 <span className="text-[#D4CFC3]">·</span>
-                <span>{entry.temperature} °C</span>
-                <span className="text-[#D4CFC3]">/</span>
-                <span>{entry.weather}</span>
+                {/* 天気アイコン + 気温 */}
+                {(() => {
+                  const iconName = getWeatherIconName(entry.weatherId);
+                  const iconProps = { className: "w-3 h-3", strokeWidth: 1.5 };
+                  const icons: Record<WeatherIconName, React.ReactNode> = {
+                    Sun: <Sun {...iconProps} />,
+                    Cloud: <Cloud {...iconProps} />,
+                    CloudRain: <CloudRain {...iconProps} />,
+                    CloudDrizzle: <CloudDrizzle {...iconProps} />,
+                    CloudLightning: <CloudLightning {...iconProps} />,
+                    CloudFog: <CloudFog {...iconProps} />,
+                    Snowflake: <Snowflake {...iconProps} />,
+                  };
+                  return icons[iconName];
+                })()}
+                <span>{entry.temperature}°C</span>
               </div>
 
               <div className="text-[#A8A89E]">
@@ -66,7 +79,9 @@ export function ArchiveCard({ entry, onTagClick }: ArchiveCardProps) {
             </div>
 
             {/* タグ */}
-            <TagList tags={entry.tags} onTagClick={onTagClick} />
+            <div className="mt-2 lg:mt-0">
+              <TagList tags={entry.tags} onTagClick={onTagClick} />
+            </div>
           </div>
         </div>
       </div>

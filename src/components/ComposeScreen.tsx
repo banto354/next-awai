@@ -1,16 +1,17 @@
 "use client";
 
-import { useActionState, useState, useEffect, useCallback, useMemo } from 'react';
+import { useActionState, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/lib/cropImage';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import { ImagePlus, CloudRain, Lock, Globe, X, AlertCircle } from 'lucide-react';
+import { ImagePlus, Lock, Globe, X, AlertCircle, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, Snowflake } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { addPostAction } from '@/app/compose/action';
 import { useLocationWeather } from '@/hooks/useLocationWeather';
 import imageCompression from 'browser-image-compression';
+import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 
 // バリデーション定数（action.tsと同期）
 const MAX_TEXT_LENGTH = 50;
@@ -74,6 +75,41 @@ export function ComposeScreen() {
   const [tempImgSrc, setTempImgSrc] = useState<string | null>(null); // 一時的に切り抜いた画像
   const [isCropOpen, setIsCropOpen] = useState(false); // トリミングが開いているかどうか
   const [showError, setShowError] = useState(false); // エラー表示のタイマー管理用
+
+  // デスクトップ用：画像の下端と右パネルの下端を揃えるためのref
+  const imageRef = useRef<HTMLLabelElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const [rightPadTop, setRightPadTop] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    const sync = () => {
+      const img = imageRef.current;
+      const panel = rightPanelRef.current;
+      if (!img || !panel || window.innerWidth < 1024) {
+        setRightPadTop(undefined);
+        return;
+      }
+      const imageBottom = img.getBoundingClientRect().bottom;
+      const panelRect = panel.getBoundingClientRect();
+      // 右パネル内のコンテンツの自然な高さを取得（paddingTopを除く）
+      const currentPadTop = parseFloat(getComputedStyle(panel).paddingTop);
+      const contentHeight = panel.scrollHeight - currentPadTop;
+      // コンテンツの下端が画像の下端に揃うようにpaddingTopを算出
+      const desiredTop = imageBottom - contentHeight;
+      const newPad = Math.max(16, desiredTop - panelRect.top);
+      setRightPadTop(newPad);
+    };
+
+    sync();
+    const ro = new ResizeObserver(sync);
+    if (imageRef.current) ro.observe(imageRef.current);
+    if (rightPanelRef.current) ro.observe(rightPanelRef.current);
+    window.addEventListener('resize', sync);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', sync);
+    };
+  }, []);
 
   // エラー表示のタイマー（3秒後に自動消去）
   useEffect(() => {
@@ -247,9 +283,22 @@ export function ComposeScreen() {
               <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">AWAI</h1>
             </div>
             <div className="flex items-center gap-2 text-[#A8A89E]">
-              <CloudRain className="w-4 h-4" />
-              {/* 気候情報取得要 */}
-              <span className="text-[13px] tracking-wide">{weather?.temp} / {weather?.description}</span>
+              {/* 天気アイコン */}
+              {(() => {
+                const iconName = getWeatherIconName(weather?.weatherId ?? null);
+                const iconProps = { className: "w-4 h-4", strokeWidth: 1.5 };
+                const icons: Record<WeatherIconName, React.ReactNode> = {
+                  Sun: <Sun {...iconProps} />,
+                  Cloud: <Cloud {...iconProps} />,
+                  CloudRain: <CloudRain {...iconProps} />,
+                  CloudDrizzle: <CloudDrizzle {...iconProps} />,
+                  CloudLightning: <CloudLightning {...iconProps} />,
+                  CloudFog: <CloudFog {...iconProps} />,
+                  Snowflake: <Snowflake {...iconProps} />,
+                };
+                return icons[iconName];
+              })()}
+              <span className="text-[13px] tracking-wide">{weather?.temp}°C</span>
             </div>
           </div>
         </div>
@@ -267,6 +316,7 @@ export function ComposeScreen() {
           </div>
 
           <label
+            ref={imageRef}
             htmlFor="image-upload"
             className="block w-full aspect-[16/10] bg-[#F5F4F0] border border-[#D4CFC3]/20 rounded-sm cursor-pointer transition-all hover:bg-[#E8E6E0]/30 hover:border-[#D4CFC3]/40 relative overflow-hidden lg:shadow-sm"
           >
@@ -296,9 +346,23 @@ export function ComposeScreen() {
           />
 
           {/* デスクトップ時の天気表示 */}
-          <div className="hidden lg:flex items-center gap-2 text-[#A8A89E] mt-6">
-            <CloudRain className="w-4 h-4" />
-            <span className="text-[13px] tracking-wide">{weather?.temp}°C / {weather?.description}</span>
+          <div className="hidden lg:flex items-center gap-3 text-[#7A7A70] mt-6">
+            {/* 天気アイコン */}
+            {(() => {
+              const iconName = getWeatherIconName(weather?.weatherId ?? null);
+              const iconProps = { className: "w-5 h-5", strokeWidth: 1.5 };
+              const icons: Record<WeatherIconName, React.ReactNode> = {
+                Sun: <Sun {...iconProps} />,
+                Cloud: <Cloud {...iconProps} />,
+                CloudRain: <CloudRain {...iconProps} />,
+                CloudDrizzle: <CloudDrizzle {...iconProps} />,
+                CloudLightning: <CloudLightning {...iconProps} />,
+                CloudFog: <CloudFog {...iconProps} />,
+                Snowflake: <Snowflake {...iconProps} />,
+              };
+              return icons[iconName];
+            })()}
+            <span className="text-[15px] font-medium tracking-wide">{weather?.temp}°C</span>
           </div>
         </div>
 
@@ -306,13 +370,17 @@ export function ComposeScreen() {
         <div className="h-px bg-[#D4CFC3]/10 mx-6 lg:hidden" />
 
         {/* テキストエリア */}
-        <div className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:justify-center lg:bg-[#F9F8F5]">
-          <div className="flex-1 lg:flex-initial lg:space-y-8">
+        <div
+          ref={rightPanelRef}
+          className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:bg-[#F9F8F5]"
+          style={rightPadTop != null ? { paddingTop: rightPadTop } : undefined}
+        >
+          <div className="flex-1 lg:flex-initial lg:space-y-4">
             <textarea
               value={post.text}
               onChange={(e) => setPost({ ...post, text: e.target.value })}
               placeholder="今考えていることを書き留めましょう..."
-              className={`w-full h-32 lg:h-48 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[17px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide ${validationWarnings.text ? 'text-red-800/80' : ''}`}
+              className={`w-full h-32 lg:h-20 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[17px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide ${validationWarnings.text ? 'text-red-800/80' : ''}`}
               style={{ fontWeight: 400 }}
               name="text"
             />

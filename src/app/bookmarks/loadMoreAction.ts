@@ -1,30 +1,32 @@
-import { BookmarksScreen } from "../../components/BookmarksScreen";
-import { auth } from '@clerk/nextjs/server';
+'use server';
+
 import { prisma } from '@/lib/prisma';
-import { BookmarkEntry } from '../types/entry';
+import { auth } from '@clerk/nextjs/server';
+import { BookmarkEntry } from '@/app/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
 import { formatDateJapanese } from '@/lib/dateUtils';
 
-const INITIAL_LIMIT = 12;
+const LIMIT = 12;
 
-export default async function BookmarksPage() {
-    // 認証はmiddlewareで処理済み。userIdはDB検索に使用
+export async function getBookmarkedPostsAction(offset: number = 0): Promise<{
+    entries: BookmarkEntry[];
+    nextOffset: number;
+    hasMore: boolean;
+}> {
     const { userId } = await auth();
-
-    // TypeScriptの型チェック用（Middlewareで認証済みのため実行時にはnullにならない）
     if (!userId) {
-        return <BookmarksScreen bookmarkedEntries={[]} initialOffset={0} initialHasMore={false} />;
+        return { entries: [], nextOffset: 0, hasMore: false };
     }
 
-    // DBから投稿を取得（初回は10件+1で次があるか判定）
     const bookmarks = await prisma.bookmark.findMany({
         where: {
             userId: userId,
         },
         orderBy: {
-            createdAt: "desc",
+            createdAt: 'desc',
         },
-        take: INITIAL_LIMIT + 1,
+        take: LIMIT + 1,
+        skip: offset,
         include: {
             post: {
                 include: {
@@ -39,10 +41,11 @@ export default async function BookmarksPage() {
         },
     });
 
-    const hasMore = bookmarks.length > INITIAL_LIMIT;
-    const bookmarksToReturn = hasMore ? bookmarks.slice(0, INITIAL_LIMIT) : bookmarks;
+    const hasMore = bookmarks.length > LIMIT;
+    const bookmarksToReturn = hasMore ? bookmarks.slice(0, LIMIT) : bookmarks;
+    const nextOffset = offset + bookmarksToReturn.length;
 
-    const bookmarkedEntries: BookmarkEntry[] = bookmarksToReturn.map((bookmark) => ({
+    const entries: BookmarkEntry[] = bookmarksToReturn.map((bookmark) => ({
         id: bookmark.post.id,
         image: bookmark.post.imageUrl || "",
         text: bookmark.post.content,
@@ -62,6 +65,6 @@ export default async function BookmarksPage() {
         },
     }));
 
-    return <BookmarksScreen bookmarkedEntries={bookmarkedEntries} initialOffset={bookmarksToReturn.length} initialHasMore={hasMore} />;
+    return { entries, nextOffset, hasMore };
 }
 

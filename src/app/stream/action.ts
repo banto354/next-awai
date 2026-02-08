@@ -7,7 +7,7 @@ import { auth } from '@clerk/nextjs/server';
 import { StreamEntry } from '@/app/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
 import { Prisma } from '@prisma/client';
-import { formatDateTimeJapanese } from '@/lib/dateUtils';
+import { formatDateJapanese } from '@/lib/dateUtils';
 
 // 取得する投稿数
 const LIMIT = 10;
@@ -85,7 +85,7 @@ export async function getStreamPostsAction(
       id: post.id,
       image: post.image_url || '',
       text: post.content,
-      date: formatDateTimeJapanese(new Date(post.created_at)),
+      date: formatDateJapanese(new Date(post.created_at)),
       weather: getWeatherLabel(post.weather_id),
       weatherId: post.weather_id,
       temperature: post.temp,

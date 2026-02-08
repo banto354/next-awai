@@ -12,3 +12,18 @@ export function getWeatherLabel(weatherId: number | null): string {
     if (weatherId > 800) return "曇";
     return "天気不明";
 }
+
+// 天気IDに基づくアイコン名を返す（lucide-react用）
+export type WeatherIconName = 'CloudLightning' | 'CloudDrizzle' | 'CloudRain' | 'Snowflake' | 'CloudFog' | 'Sun' | 'Cloud';
+
+export function getWeatherIconName(weatherId: number | null): WeatherIconName {
+    if (!weatherId) return 'Cloud';
+    if (weatherId >= 200 && weatherId < 300) return 'CloudLightning'; // 雷雨
+    if (weatherId >= 300 && weatherId < 500) return 'CloudDrizzle';   // 霧雨
+    if (weatherId >= 500 && weatherId < 600) return 'CloudRain';      // 雨
+    if (weatherId >= 600 && weatherId < 700) return 'Snowflake';      // 雪
+    if (weatherId >= 700 && weatherId < 800) return 'CloudFog';       // 霧
+    if (weatherId === 800) return 'Sun';                               // 晴
+    if (weatherId > 800) return 'Cloud';       // 曇り
+    return 'Cloud';
+}
