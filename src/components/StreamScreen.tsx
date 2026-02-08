@@ -213,18 +213,20 @@ export function StreamScreen() {
             </div>
 
             {/* 右: ブックマークアイコン */}
-            <button
-              onClick={toggleBookmark}
-              className="transition-all hover:scale-110"
-              aria-label="Bookmark this entry"
-            >
-              <Bookmark
-                className="w-5 h-5"
-                strokeWidth={1.5}
-                fill={isBookmarked ? '#C5A088' : 'none'}
-                stroke={isBookmarked ? '#C5A088' : '#A8A89E'}
-              />
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleBookmark}
+                className="transition-all hover:scale-110"
+                aria-label="Bookmark this entry"
+              >
+                <Bookmark
+                  className="w-5 h-5"
+                  strokeWidth={1.5}
+                  fill={isBookmarked ? '#C5A088' : 'none'}
+                  stroke={isBookmarked ? '#C5A088' : '#A8A89E'}
+                />
+              </button>
+            </div>
           </div>
 
           {/* タグ */}

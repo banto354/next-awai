@@ -76,28 +76,25 @@ export function ComposeScreen() {
   const [isCropOpen, setIsCropOpen] = useState(false); // トリミングが開いているかどうか
   const [showError, setShowError] = useState(false); // エラー表示のタイマー管理用
 
-  // デスクトップ用：画像の下端と右パネルの下端を揃えるためのref
+  // デスクトップ用：右パネルのコンテンツ下端を画像下端に揃える
   const imageRef = useRef<HTMLLabelElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
-  const [rightPadTop, setRightPadTop] = useState<number | undefined>(undefined);
+  const [rightPadBottom, setRightPadBottom] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const sync = () => {
       const img = imageRef.current;
       const panel = rightPanelRef.current;
       if (!img || !panel || window.innerWidth < 1024) {
-        setRightPadTop(undefined);
+        setRightPadBottom(undefined);
         return;
       }
       const imageBottom = img.getBoundingClientRect().bottom;
-      const panelRect = panel.getBoundingClientRect();
-      // 右パネル内のコンテンツの自然な高さを取得（paddingTopを除く）
-      const currentPadTop = parseFloat(getComputedStyle(panel).paddingTop);
-      const contentHeight = panel.scrollHeight - currentPadTop;
-      // コンテンツの下端が画像の下端に揃うようにpaddingTopを算出
-      const desiredTop = imageBottom - contentHeight;
-      const newPad = Math.max(16, desiredTop - panelRect.top);
-      setRightPadTop(newPad);
+      const panelBottom = panel.getBoundingClientRect().bottom;
+      // パネル下端から画像下端までの距離を paddingBottom にして、
+      // justify-end でコンテンツを下揃えにすると、コンテンツ下端が画像下端に揃う
+      const newPadBottom = Math.max(16, panelBottom - imageBottom);
+      setRightPadBottom(newPadBottom);
     };
 
     sync();
@@ -372,8 +369,8 @@ export function ComposeScreen() {
         {/* テキストエリア */}
         <div
           ref={rightPanelRef}
-          className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:bg-[#F9F8F5]"
-          style={rightPadTop != null ? { paddingTop: rightPadTop } : undefined}
+          className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:bg-[#F9F8F5] lg:justify-end"
+          style={rightPadBottom != null ? { paddingBottom: rightPadBottom } : undefined}
         >
           <div className="flex-1 lg:flex-initial lg:space-y-4">
             <textarea
