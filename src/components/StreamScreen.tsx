@@ -162,7 +162,7 @@ export function StreamScreen() {
         <div className="lg:max-w-4xl lg:mx-auto w-full">
 
           {/* Image Area */}
-          <div className="relative w-full aspect-[16/10] lg:aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
+          <div className="relative w-full aspect-[16/10] bg-[#F5F4F0] rounded-sm overflow-hidden lg:shadow-lg">
             {currentEntry.image ? (
               <Image
                 src={currentEntry.image}
@@ -220,7 +220,7 @@ export function StreamScreen() {
                 aria-label="Bookmark this entry"
               >
                 <Bookmark
-                  className="w-5 h-5"
+                  className="w-6 h-6 lg:w-7 lg:h-7"
                   strokeWidth={1.5}
                   fill={isBookmarked ? '#C5A088' : 'none'}
                   stroke={isBookmarked ? '#C5A088' : '#A8A89E'}
