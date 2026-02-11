@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AppLayout } from "../components/AppLayout";
 import "../styles/index.css";
 import { ClerkProvider } from "@clerk/nextjs";
-
+import { jaJP } from '@clerk/localizations'
 export const metadata: Metadata = {
   title: "Awai",
   description: "Japanese Minimalist App",
@@ -14,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
+    <ClerkProvider localization={jaJP}>
+      <html lang="ja">
         <body className="antialiased bg-[#FAFAF8]">
           <AppLayout>{children}</AppLayout>
         </body>
