@@ -74,30 +74,43 @@ export function ComposeScreen() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null); // 切り抜き範囲(pixel)
   const [tempImgSrc, setTempImgSrc] = useState<string | null>(null); // 一時的に切り抜いた画像
   const [isCropOpen, setIsCropOpen] = useState(false); // トリミングが開いているかどうか
-  const [showError, setShowError] = useState(false); // エラー表示のタイマー管理用
+  // エラー表示管理：render中にformState変化を検出（React推奨パターン）
+  const [showError, setShowError] = useState(false);
+  const [prevFormState, setPrevFormState] = useState(formState);
 
-  // デスクトップ用：画像の下端と右パネルの下端を揃えるためのref
+  if (formState !== prevFormState) {
+    setPrevFormState(formState);
+    if (formState.error) {
+      setShowError(true);
+    }
+  }
+
+  // 3秒後にエラーを自動消去
+  useEffect(() => {
+    if (!showError) return;
+    const timer = setTimeout(() => setShowError(false), 3000);
+    return () => clearTimeout(timer);
+  }, [showError]);
+
+  // デスクトップ用：右パネルのコンテンツ下端を画像下端に揃える
   const imageRef = useRef<HTMLLabelElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
-  const [rightPadTop, setRightPadTop] = useState<number | undefined>(undefined);
+  const [rightPadBottom, setRightPadBottom] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const sync = () => {
       const img = imageRef.current;
       const panel = rightPanelRef.current;
       if (!img || !panel || window.innerWidth < 1024) {
-        setRightPadTop(undefined);
+        setRightPadBottom(undefined);
         return;
       }
       const imageBottom = img.getBoundingClientRect().bottom;
-      const panelRect = panel.getBoundingClientRect();
-      // 右パネル内のコンテンツの自然な高さを取得（paddingTopを除く）
-      const currentPadTop = parseFloat(getComputedStyle(panel).paddingTop);
-      const contentHeight = panel.scrollHeight - currentPadTop;
-      // コンテンツの下端が画像の下端に揃うようにpaddingTopを算出
-      const desiredTop = imageBottom - contentHeight;
-      const newPad = Math.max(16, desiredTop - panelRect.top);
-      setRightPadTop(newPad);
+      const panelBottom = panel.getBoundingClientRect().bottom;
+      // パネル下端から画像下端までの距離を paddingBottom にして、
+      // justify-end でコンテンツを下揃えにすると、コンテンツ下端が画像下端に揃う
+      const newPadBottom = Math.max(16, panelBottom - imageBottom);
+      setRightPadBottom(newPadBottom);
     };
 
     sync();
@@ -110,17 +123,6 @@ export function ComposeScreen() {
       window.removeEventListener('resize', sync);
     };
   }, []);
-
-  // エラー表示のタイマー（3秒後に自動消去）
-  useEffect(() => {
-    if (formState.error) {
-      setShowError(true);
-      const timer = setTimeout(() => {
-        setShowError(false);
-      }, 3000); // 3秒後に消える
-      return () => clearTimeout(timer);
-    }
-  }, [formState]); // formState全体を監視して、同じエラーでも再トリガーされるように
 
   // バリデーション警告を計算
   const validationWarnings = useMemo(() => {
@@ -307,7 +309,7 @@ export function ComposeScreen() {
         <div className="flex-1 px-6 pb-4 lg:w-3/5 lg:px-16 lg:py-16 lg:pb-16 lg:flex lg:flex-col lg:justify-center">
           {/* デスクトップヘッダー */}
           <div className="hidden lg:block mb-12">
-            <h1 className="text-[13px] tracking-[0.2em] uppercase text-[#9B9890] mb-8">AWAI — 書く</h1>
+            <h1 className="text-[13px] tracking-[0.2em] uppercase text-[#9B9890] mb-8">COMPOSE — 書く</h1>
             {!post.locationAvailable && (
               <div className="text-[11px] text-[#9B9890] tracking-wide bg-gradient-to-r from-[#E8E6E0] to-transparent py-2 px-3 rounded-sm inline-block">
                 どこか
@@ -372,8 +374,8 @@ export function ComposeScreen() {
         {/* テキストエリア */}
         <div
           ref={rightPanelRef}
-          className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:bg-[#F9F8F5]"
-          style={rightPadTop != null ? { paddingTop: rightPadTop } : undefined}
+          className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:bg-[#F9F8F5] lg:justify-end"
+          style={rightPadBottom != null ? { paddingBottom: rightPadBottom } : undefined}
         >
           <div className="flex-1 lg:flex-initial lg:space-y-4">
             <textarea
@@ -405,7 +407,7 @@ export function ComposeScreen() {
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagKeyDown}
                   onBlur={handleTagBlur}
-                  placeholder={tagList.length === 0 ? "春, 食べ物, 晴れ..." : ""}
+                  placeholder={tagList.length === 0 ? "夕暮れ, 公園, ひまわり..." : ""}
                   className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[16px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
                   style={{ fontWeight: 400 }}
                 // name="tags"

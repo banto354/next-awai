@@ -36,7 +36,7 @@ export function TemperatureFilter({
           {loading
             ? '気温を取得中...'
             : temp !== null
-              ? `今日と同じ気温 (${temp}°C)`
+              ? `今と同じ気温 (${temp}°C)`
               : '気温を取得できません'
           }
         </span>
