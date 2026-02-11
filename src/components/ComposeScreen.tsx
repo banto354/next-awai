@@ -407,7 +407,7 @@ export function ComposeScreen() {
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagKeyDown}
                   onBlur={handleTagBlur}
-                  placeholder={tagList.length === 0 ? "春, 食べ物, 晴れ..." : ""}
+                  placeholder={tagList.length === 0 ? "夕暮れ, 公園, ひまわり..." : ""}
                   className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[16px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
                   style={{ fontWeight: 400 }}
                 // name="tags"
