@@ -99,11 +99,11 @@ export function BookmarksScreen({ bookmarkedEntries, initialOffset, initialHasMo
             <div className="text-[10px] lg:text-[12px] text-[#D4CFC3] tracking-[0.2em] uppercase">
               スクロールで追加読み込み
             </div>
-          ) : (
+          ) : entries.length > 0 ? (
             <div className="text-[10px] lg:text-[12px] text-[#9B9890] tracking-[0.2em] uppercase">
-              End of saved bookmarks
+              {entries.length} 件の投稿
             </div>
-          )}
+          ) : null}
         </div>
       )}
     </div>
