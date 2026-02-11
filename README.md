@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AWAI (Next.js Location-based SNS)
 
-## Getting Started
+「AWAI」は、位置情報と季節（天気・気温）を共有するライフログ/SNSアプリケーションです。「何気ない瞬間を、淡く残す」をコンセプトに、フォロー/フォロワー関係ではなく、物理的な距離と偶然性によって投稿と出会う体験を提供します。
 
-First, run the development server:
+## 📖 概要
 
+Next.js App Router と Server Actions を全面的に採用し、APIレスなアーキテクチャで構築されています。位置情報に基づいた独自のコンテンツ配信アルゴリズムと、洗練されたUI/UXが特徴です。
+
+## 🛠 技術スタック
+
+### Frontend
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Language**: TypeScript
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: shadcn/ui (Radix UI based)
+- **Image Handling**: react-easy-crop
+- **Icons**: Lucide React
+
+### Backend / Infrastructure
+- **Database**: PostgreSQL
+- **ORM**: [Prisma](https://www.prisma.io/)
+- **Auth**: [Clerk](https://clerk.com/)
+- **Deployment**: Vercel (Recommended)
+
+## ✨ 主な機能と技術的特徴
+
+### 1. Stream (独自のタイムライン)
+現在地に近い投稿を優先しつつ、ランダムな要素を取り入れたタイムラインを表示します。
+- **実装詳細**: Prisma の `$queryRaw` を使用し、データベースレベルで「距離スコア」と「ランダム係数」を掛け合わせたソート処理を高速に実行しています。
+
+### 2. 投稿 (Compose)
+- **画像処理**: アップロードされた画像を、アプリの世界観に合わせて **16:10** の比率にクライアントサイドでクロップします。
+- **メタデータ**: 投稿時に Geolocation API から位置情報を取得し、同時に OpenWeatherMap API を経由して現地の天気と気温を自動記録します。
+
+### 3. アーカイブ & ブックマーク
+- **Archive**: 自分の過去の投稿（ライフログ）を一覧表示します。
+- **Bookmarks**: 気に入った他者の投稿を保存・管理できます。
+
+## 🚀 ローカル開発環境のセットアップ
+
+### 1. リポジトリのクローン
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone <repository-url>
+cd next-awai
