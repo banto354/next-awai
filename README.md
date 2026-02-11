@@ -9,7 +9,7 @@ Next.js App Router と Server Actions を全面的に採用し、APIレスなア
 ## 🛠 技術スタック
 
 ### Frontend
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
 - **Language**: TypeScript
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **UI Components**: shadcn/ui (Radix UI based)
@@ -36,9 +36,17 @@ Next.js App Router と Server Actions を全面的に採用し、APIレスなア
 - **Archive**: 自分の過去の投稿（ライフログ）を一覧表示します。
 - **Bookmarks**: 気に入った他者の投稿を保存・管理できます。
 
-## 🚀 ローカル開発環境のセットアップ
+📂 ディレクトリ構成
+src/app: Next.js App Router のページコンポーネントと Server Actions
 
-### 1. リポジトリのクローン
-```bash
-git clone <repository-url>
-cd next-awai
+stream: タイムライン表示機能とロジック (action.ts)
+
+compose: 投稿作成機能
+
+api: Route Handlers (Weather API, Webhooks)
+
+src/components: UIコンポーネント (shadcn/ui含む)
+
+src/lib: ユーティリティ関数、DBクライアント、外部API連携
+
+prisma: データベーススキーマとマイグレーションファイル
