@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
 import { Bookmark } from 'lucide-react';
-import { BookmarkEntry } from '@/app/types/entry';
+import { BookmarkEntry } from '@/types/entry';
 import { BookmarkCard } from '@/components/features/bookmarks/BookmarkCard';
 import { getBookmarkedPostsAction } from '@/app/bookmarks/loadMoreAction';
 

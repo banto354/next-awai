@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { ArchiveScreen } from "../../components/ArchiveScreen";
+import { ArchiveScreen } from "@/components/screens/ArchiveScreen";
 import { auth } from "@clerk/nextjs/server";
 import { ArchiveEntry } from "../types/entry";
 import { getWeatherLabel } from "@/lib/weatherUtils";

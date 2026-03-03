@@ -1,8 +1,8 @@
-import { EntryDetailFeed } from '@/components/EntryDetailFeed';
-import { mockEntries } from '@/app/data/mockEntries';
+import { EntryDetailFeed } from '@/components/screens/EntryDetailFeed';
+import { mockEntries } from '@/data/mockEntries';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { Entry } from '@/app/types/entry';
+import { Entry } from '@/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
 import { auth } from '@clerk/nextjs/server';
 import { formatDateJapanese } from '@/lib/dateUtils';

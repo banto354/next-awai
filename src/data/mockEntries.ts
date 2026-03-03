@@ -1,4 +1,4 @@
-import { ArchiveEntry } from "../types/entry";
+import { ArchiveEntry } from "@/types/entry";
 
 export const mockEntries: ArchiveEntry[] = [
   {
