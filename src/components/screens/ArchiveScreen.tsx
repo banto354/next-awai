@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
-import { ArchiveCard } from './features/archive/ArchiveCard';
-import { TemperatureFilter } from './features/archive/TemperatureFilter';
-import { TagFilter } from './features/archive/TagFilter';
-import { ArchiveEntry } from '@/app/types/entry';
+import { ArchiveCard } from '@/components/features/archive/ArchiveCard';
+import { TemperatureFilter } from '@/components/features/archive/TemperatureFilter';
+import { TagFilter } from '@/components/features/archive/TagFilter';
+import { ArchiveEntry } from '@/types/entry';
 import { getArchivePostsAction } from '@/app/archive/action';
 import { useLocationWeather } from '@/hooks/useLocationWeather';
 

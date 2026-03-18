@@ -1,4 +1,4 @@
-import { BookmarksScreen } from "../../components/BookmarksScreen";
+import { BookmarksScreen } from "@/components/screens/BookmarksScreen";
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { BookmarkEntry } from '../types/entry';

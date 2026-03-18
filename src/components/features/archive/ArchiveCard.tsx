@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Lock, Globe, Bookmark, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, Snowflake } from 'lucide-react';
 import { TagList } from '@/components/ui/tagList';
-import { ArchiveEntry } from '@/app/types/entry';
+import { ArchiveEntry } from '@/types/entry';
 import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 
 // プロパティの型定義
