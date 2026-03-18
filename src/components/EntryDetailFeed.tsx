@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Bookmark, ChevronLeft, Trash2, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, CloudSun, Snowflake } from 'lucide-react';
+import { Bookmark, ChevronLeft, Trash2, Pencil, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, CloudSun, Snowflake } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Entry } from '@/app/types/entry';
@@ -129,6 +129,16 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
 
             {/* 右: アイコン */}
             <div className="flex items-center gap-3">
+              {/* 編集ボタン (所有者のみ表示) */}
+              {isAuthor && (
+                <button
+                  onClick={() => router.push(`/entry/${entry.id}/edit`)}
+                  className="transition-all hover:scale-110 text-[#A8A89E] hover:text-[#3D3D3A]"
+                  aria-label="Edit entry"
+                >
+                  <Pencil className="w-5 h-5" strokeWidth={1.5} />
+                </button>
+              )}
               {/* 削除ボタン (所有者のみ表示) */}
               {isAuthor && (
                 <AlertDialog>
