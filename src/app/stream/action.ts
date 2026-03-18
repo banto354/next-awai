@@ -4,7 +4,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
-import { StreamEntry } from '@/app/types/entry';
+import { StreamEntry } from '@/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
 import { Prisma } from '@prisma/client';
 import { formatDateJapanese } from '@/lib/dateUtils';

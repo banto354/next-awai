@@ -3,10 +3,10 @@
 import { useState, useEffect, useTransition } from 'react';
 import { Bookmark, ChevronLeft, ChevronRight, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, Snowflake } from 'lucide-react';
 import Image from 'next/image';
-import { mockEntries } from '@/app/data/mockEntries';
+import { mockEntries } from '@/data/mockEntries';
 import { getStreamPostsAction } from '@/app/stream/action';
 import { toggleBookmarkAction } from '@/app/bookmarks/action';
-import { StreamEntry } from '@/app/types/entry';
+import { StreamEntry } from '@/types/entry';
 import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 
 // 初期状態（ローディング中など）

@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { Bookmark, ChevronLeft, Trash2, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, CloudSun, Snowflake } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Entry } from '@/app/types/entry';
+import { Entry } from '@/types/entry';
 import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 import {
   AlertDialog,

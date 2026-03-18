@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
-import { BookmarkEntry } from '@/app/types/entry';
+import { BookmarkEntry } from '@/types/entry';
 import { getWeatherLabel } from '@/lib/weatherUtils';
 import { formatDateJapanese } from '@/lib/dateUtils';
 
