@@ -282,7 +282,7 @@ export function ComposeScreen() {
         <div className="px-6 pt-12 pb-6 lg:hidden">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">AWAI</h1>
+              <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">COMPOSE — 書く</h1>
             </div>
             <div className="flex items-center gap-2 text-[#A8A89E]">
               {/* 天気アイコン */}

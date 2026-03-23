@@ -30,6 +30,8 @@ export default async function EditPage({ params }: PageProps) {
       initialTags={post.tags.map((t) => t.tag.name)}
       initialIsPublic={post.isPublic}
       initialImageUrl={post.imageUrl ?? ''}
+      weatherId={post.weatherId ?? 0}
+      temperature={Math.round(post.temp ?? 0)}
     />
   );
 }

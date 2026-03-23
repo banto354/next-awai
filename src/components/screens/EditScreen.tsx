@@ -1,12 +1,14 @@
 "use client";
 
-import { useActionState, useState, useEffect, useCallback, useMemo } from 'react';
+import { useActionState, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/lib/cropImage';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
 import { ImagePlus, Lock, Globe, X, AlertCircle } from 'lucide-react';
+import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
+import { Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, Snowflake } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { updatePostAction } from '@/app/entry/[id]/edit/action';
@@ -22,6 +24,8 @@ interface EditScreenProps {
   initialTags: string[];
   initialIsPublic: boolean;
   initialImageUrl: string;
+  weatherId: number;
+  temperature: number;
 }
 
 function SubmitButton() {
@@ -38,7 +42,7 @@ function SubmitButton() {
   );
 }
 
-export function EditScreen({ postId, initialText, initialTags, initialIsPublic, initialImageUrl }: EditScreenProps) {
+export function EditScreen({ postId, initialText, initialTags, initialIsPublic, initialImageUrl, weatherId, temperature }: EditScreenProps) {
   const router = useRouter();
   const [formState, dispatch] = useActionState(updatePostAction, { success: false, error: '', postId: '' });
 
@@ -51,6 +55,36 @@ export function EditScreen({ postId, initialText, initialTags, initialIsPublic, 
   // 画像管理
   const [previewImage, setPreviewImage] = useState<string>(initialImageUrl);
   const [newFile, setNewFile] = useState<File | null>(null);
+
+  // デスクトップ用：右パネルのコンテンツ下端を画像下端に揃える
+  const imageRef = useRef<HTMLLabelElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const [rightPadBottom, setRightPadBottom] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    const sync = () => {
+      const img = imageRef.current;
+      const panel = rightPanelRef.current;
+      if (!img || !panel || window.innerWidth < 1024) {
+        setRightPadBottom(undefined);
+        return;
+      }
+      const imageBottom = img.getBoundingClientRect().bottom;
+      const panelBottom = panel.getBoundingClientRect().bottom;
+      const newPadBottom = Math.max(16, panelBottom - imageBottom);
+      setRightPadBottom(newPadBottom);
+    };
+
+    sync();
+    const ro = new ResizeObserver(sync);
+    if (imageRef.current) ro.observe(imageRef.current);
+    if (rightPanelRef.current) ro.observe(rightPanelRef.current);
+    window.addEventListener('resize', sync);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', sync);
+    };
+  }, []);
 
   // トリミング
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -188,16 +222,36 @@ export function EditScreen({ postId, initialText, initialTags, initialIsPublic, 
       <form action={dispatch} className="min-h-screen flex flex-col bg-[#FAFAF8] lg:flex-row lg:gap-0">
         {/* モバイル用ヘッダー */}
         <div className="px-6 pt-12 pb-6 lg:hidden">
-          <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">AWAI — 編集</h1>
+          <div className="flex items-start justify-between">
+            <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">EDIT — 編集</h1>
+            <div className="flex items-center gap-2 text-[#A8A89E]">
+              {(() => {
+                const iconName = getWeatherIconName(weatherId);
+                const iconProps = { className: 'w-4 h-4', strokeWidth: 1.5 };
+                const icons: Record<WeatherIconName, React.ReactNode> = {
+                  Sun: <Sun {...iconProps} />,
+                  Cloud: <Cloud {...iconProps} />,
+                  CloudRain: <CloudRain {...iconProps} />,
+                  CloudDrizzle: <CloudDrizzle {...iconProps} />,
+                  CloudLightning: <CloudLightning {...iconProps} />,
+                  CloudFog: <CloudFog {...iconProps} />,
+                  Snowflake: <Snowflake {...iconProps} />,
+                };
+                return icons[iconName];
+              })()}
+              <span className="text-[13px] tracking-wide">{temperature}°C</span>
+            </div>
+          </div>
         </div>
 
         {/* 左パネル：画像 */}
-        <div className="flex-1 px-6 pb-4 lg:w-3/5 lg:px-16 lg:py-16 lg:flex lg:flex-col lg:justify-center">
+        <div className="px-6 pb-4 lg:flex-1 lg:w-3/5 lg:px-16 lg:py-16 lg:flex lg:flex-col lg:justify-center">
           <div className="hidden lg:block mb-12">
-            <h1 className="text-[13px] tracking-[0.2em] uppercase text-[#9B9890]">AWAI — 編集</h1>
+            <h1 className="text-[13px] tracking-[0.2em] uppercase text-[#9B9890]">EDIT — 編集</h1>
           </div>
 
           <label
+            ref={imageRef}
             htmlFor="image-upload-edit"
             className="block w-full aspect-[16/10] bg-[#F5F4F0] border border-[#D4CFC3]/20 rounded-sm cursor-pointer transition-all hover:bg-[#E8E6E0]/30 hover:border-[#D4CFC3]/40 relative overflow-hidden lg:shadow-sm"
           >
@@ -232,13 +286,36 @@ export function EditScreen({ postId, initialText, initialTags, initialIsPublic, 
             className="hidden"
             name="image"
           />
+
+          {/* デスクトップ時の天気表示 */}
+          <div className="hidden lg:flex items-center gap-3 mt-6 text-[#7A7A70]">
+            {(() => {
+              const iconName = getWeatherIconName(weatherId);
+              const iconProps = { className: 'w-5 h-5', strokeWidth: 1.5 };
+              const icons: Record<WeatherIconName, React.ReactNode> = {
+                Sun: <Sun {...iconProps} />,
+                Cloud: <Cloud {...iconProps} />,
+                CloudRain: <CloudRain {...iconProps} />,
+                CloudDrizzle: <CloudDrizzle {...iconProps} />,
+                CloudLightning: <CloudLightning {...iconProps} />,
+                CloudFog: <CloudFog {...iconProps} />,
+                Snowflake: <Snowflake {...iconProps} />,
+              };
+              return icons[iconName];
+            })()}
+            <span className="text-[15px] font-medium tracking-wide">{temperature}°C</span>
+          </div>
         </div>
 
         {/* モバイル分割線 */}
         <div className="h-px bg-[#D4CFC3]/10 mx-6 lg:hidden" />
 
         {/* 右パネル：フォーム */}
-        <div className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:bg-[#F9F8F5] lg:justify-end">
+        <div
+          ref={rightPanelRef}
+          className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:bg-[#F9F8F5] lg:justify-end"
+          style={rightPadBottom != null ? { paddingBottom: rightPadBottom } : undefined}
+        >
           <div className="flex-1 lg:flex-initial lg:space-y-4">
             <textarea
               value={text}
