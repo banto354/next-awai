@@ -93,7 +93,7 @@ export function EditScreen({ postId, initialText, initialTags, initialIsPublic, 
   const [tempImgSrc, setTempImgSrc] = useState<string | null>(null);
   const [isCropOpen, setIsCropOpen] = useState(false);
 
-  // 更新成功時: 履歴を置き換えて詳細ページへ（router.back()が正しく動くように）
+  // 更新成功時: 詳細ページへ（revalidatePathでRouter Cacheを無効化済み）
   useEffect(() => {
     if (formState.success && formState.postId) {
       router.replace(`/entry/${formState.postId}`);

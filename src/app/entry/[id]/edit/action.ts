@@ -109,6 +109,6 @@ export async function updatePostAction(prevState: any, formData: FormData) {
         return { success: false, error: "投稿の更新に失敗しました" };
     }
 
-    revalidatePath(`/entry/${postId}`);
+    revalidatePath(`/entry/${postId}`, 'page');
     return { success: true, postId, error: '' };
 }
