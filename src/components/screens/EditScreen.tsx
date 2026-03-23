@@ -1,96 +1,60 @@
 "use client";
 
 import { useActionState, useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/lib/cropImage';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import { ImagePlus, Lock, Globe, X, AlertCircle, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, Snowflake } from 'lucide-react';
+import { ImagePlus, Lock, Globe, X, AlertCircle } from 'lucide-react';
+import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
+import { Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, Snowflake } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
-import { addPostAction } from '@/app/compose/action';
-import { useLocationWeather } from '@/hooks/useLocationWeather';
+import { updatePostAction } from '@/app/entry/[id]/edit/action';
 import imageCompression from 'browser-image-compression';
-import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 
-// バリデーション定数（action.tsと同期）
 const MAX_TEXT_LENGTH = 50;
 const MAX_TAG_COUNT = 5;
 const MAX_TAG_LENGTH = 10;
 
-// 投稿データの形状を定義
-interface PostState {
-  image: string | null;
-  text: string;
-  isPublic: boolean;
-  tags: string;
-  // longitude: number;
-  // latitude: number;
-  locationAvailable: boolean;
-  file: File | null;
+interface EditScreenProps {
+  postId: string;
+  initialText: string;
+  initialTags: string[];
+  initialIsPublic: boolean;
+  initialImageUrl: string;
+  weatherId: number;
+  temperature: number;
 }
-
-// 初期値の設定
-const initialState: PostState = {
-  image: null,
-  text: '',
-  isPublic: false,
-  tags: '',
-  // longitude: 0,
-  // latitude: 0,
-  locationAvailable: true,
-  file: null,
-};
 
 function SubmitButton() {
   const { pending } = useFormStatus();
-  console.log('SubmitButton pending:', pending);
   return (
     <button
       type="submit"
       disabled={pending}
       className="px-8 lg:px-12 py-2.5 lg:py-3 bg-[#D4CFC3] text-[#3D3D3A] text-[13px] lg:text-[15px] tracking-[0.08em] rounded-sm transition-all hover:opacity-80 hover:shadow-md"
       style={{ fontWeight: 400 }}
-      onClick={() => console.log('SubmitButton clicked')}
     >
-      {pending ? '保存中...' : '保存'}
+      {pending ? '更新中...' : '更新する'}
     </button>
   );
 }
 
-export function ComposeScreen() {
-  // フォームの状態管理
-  const [formState, dispatch] = useActionState(addPostAction, { success: false, error: '' });
-  // UI用のStateを定義
-  const [post, setPost] = useState<PostState>(initialState);
-  // タグ管理用のState
-  const [tagList, setTagList] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
-  // 天気情報
-  const { location, weather, loading } = useLocationWeather();
-  // トリミング用のState
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null); // 切り抜き範囲(pixel)
-  const [tempImgSrc, setTempImgSrc] = useState<string | null>(null); // 一時的に切り抜いた画像
-  const [isCropOpen, setIsCropOpen] = useState(false); // トリミングが開いているかどうか
-  // エラー表示管理：render中にformState変化を検出（React推奨パターン）
-  const [showError, setShowError] = useState(false);
-  const [prevFormState, setPrevFormState] = useState(formState);
+export function EditScreen({ postId, initialText, initialTags, initialIsPublic, initialImageUrl, weatherId, temperature }: EditScreenProps) {
+  const router = useRouter();
+  const [formState, dispatch] = useActionState(updatePostAction, { success: false, error: '', postId: '' });
 
-  if (formState !== prevFormState) {
-    setPrevFormState(formState);
-    if (formState.error) {
-      setShowError(true);
-    }
-  }
+  const [text, setText] = useState(initialText);
+  const [isPublic, setIsPublic] = useState(initialIsPublic);
+  const [tagList, setTagList] = useState<string[]>(initialTags);
+  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState(initialTags.join(','));
 
-  // 3秒後にエラーを自動消去
-  useEffect(() => {
-    if (!showError) return;
-    const timer = setTimeout(() => setShowError(false), 3000);
-    return () => clearTimeout(timer);
-  }, [showError]);
+  // 画像管理
+  const [previewImage, setPreviewImage] = useState<string>(initialImageUrl);
+  const [newFile, setNewFile] = useState<File | null>(null);
 
   // デスクトップ用：右パネルのコンテンツ下端を画像下端に揃える
   const imageRef = useRef<HTMLLabelElement>(null);
@@ -107,8 +71,6 @@ export function ComposeScreen() {
       }
       const imageBottom = img.getBoundingClientRect().bottom;
       const panelBottom = panel.getBoundingClientRect().bottom;
-      // パネル下端から画像下端までの距離を paddingBottom にして、
-      // justify-end でコンテンツを下揃えにすると、コンテンツ下端が画像下端に揃う
       const newPadBottom = Math.max(16, panelBottom - imageBottom);
       setRightPadBottom(newPadBottom);
     };
@@ -124,156 +86,136 @@ export function ComposeScreen() {
     };
   }, []);
 
-  // バリデーション警告を計算
+  // トリミング
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [tempImgSrc, setTempImgSrc] = useState<string | null>(null);
+  const [isCropOpen, setIsCropOpen] = useState(false);
+
+  // 更新成功時: 詳細ページへ（revalidatePathでRouter Cacheを無効化済み）
+  useEffect(() => {
+    if (formState.success && formState.postId) {
+      router.replace(`/entry/${formState.postId}`);
+    }
+  }, [formState.success, formState.postId, router]);
+
+  // エラー表示
+  const [showError, setShowError] = useState(false);
+  const [prevFormState, setPrevFormState] = useState(formState);
+  if (formState !== prevFormState) {
+    setPrevFormState(formState);
+    if (formState.error) setShowError(true);
+  }
+  useEffect(() => {
+    if (!showError) return;
+    const timer = setTimeout(() => setShowError(false), 3000);
+    return () => clearTimeout(timer);
+  }, [showError]);
+
   const validationWarnings = useMemo(() => {
     const warnings: { text?: string; tags?: string; tagInput?: string } = {};
-
-    // テキスト長チェック
-    if (post.text.length > MAX_TEXT_LENGTH) {
-      warnings.text = `テキストは${MAX_TEXT_LENGTH}文字以内にしてください（現在${post.text.length}文字）`;
+    if (text.length > MAX_TEXT_LENGTH) {
+      warnings.text = `テキストは${MAX_TEXT_LENGTH}文字以内にしてください（現在${text.length}文字）`;
     }
-
-    // タグ数チェック（上限を超えた場合のみ警告）
     if (tagList.length > MAX_TAG_COUNT) {
       warnings.tags = `タグは${MAX_TAG_COUNT}個以内にしてください（現在${tagList.length}個）`;
-    }
-    // 上限に達した状態で新しいタグを入力しようとしている場合
-    else if (tagList.length >= MAX_TAG_COUNT && tagInput.trim().length > 0) {
+    } else if (tagList.length >= MAX_TAG_COUNT && tagInput.trim().length > 0) {
       warnings.tags = `タグは${MAX_TAG_COUNT}個までです。これ以上追加できません`;
     }
-
-    // タグ入力中の長さチェック
     if (tagInput.length > MAX_TAG_LENGTH) {
       warnings.tagInput = `タグは${MAX_TAG_LENGTH}文字以内にしてください（現在${tagInput.length}文字）`;
     }
-
     return warnings;
-  }, [post.text, tagList.length, tagInput]);
+  }, [text, tagList.length, tagInput]);
 
-  // ファイル選択時の処理（まずはトリミング画面を開く）
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = () => {
       setTempImgSrc(reader.result as string);
-      setIsCropOpen(true); // モーダルを開く
-      setZoom(1); // ズーム初期化
+      setIsCropOpen(true);
+      setZoom(1);
     };
     reader.readAsDataURL(file);
-
-    // 同じファイルを再選択できるようにinputをリセット
     e.target.value = '';
   };
 
-  // トリミング完了時の処理
-  const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
+  const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
-  // 「決定」ボタンを押したときの処理 (トリミング実行 -> 圧縮 -> state保存)
   const handleCropConfirm = async () => {
     if (!tempImgSrc || !croppedAreaPixels) return;
-
     try {
-      // トリミング実行 (Blobを取得)
       const croppedBlob = await getCroppedImg(tempImgSrc, croppedAreaPixels);
       if (!croppedBlob) return;
-
-      // BlobをFileオブジェクトに変換
-      const croppedFile = new File([croppedBlob], "cropped.jpg", { type: "image/jpeg" });
-
-      // 圧縮実行 
-      const options = {
+      const croppedFile = new File([croppedBlob], 'cropped.jpg', { type: 'image/jpeg' });
+      const compressedBlob = await imageCompression(croppedFile, {
         maxSizeMB: 1,
         maxWidthOrHeight: 1920,
         useWebWorker: true,
-      };
-      const compressedBlob = await imageCompression(croppedFile, options);
-      const compressedFile = new File([compressedBlob], "compressed.jpg", {
+      });
+      const compressedFile = new File([compressedBlob], 'compressed.jpg', {
         type: compressedBlob.type,
         lastModified: Date.now(),
       });
-      // プレビュー表示用のURL生成をPromiseでラップ
       const previewUrl = await new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.readAsDataURL(compressedFile);
-        reader.onload = (event) => {
-          resolve(event.target?.result as string);
-        };
-      })
-      // プレビュー表示更新
-      setPost(prev => ({
-        ...prev,
-        image: previewUrl,
-        file: compressedFile
-      }));
-
-      setIsCropOpen(false); // モーダル閉じる
+        reader.onload = (e) => resolve(e.target?.result as string);
+      });
+      setPreviewImage(previewUrl);
+      setNewFile(compressedFile);
+      setIsCropOpen(false);
     } catch (e) {
       console.error(e);
     }
   };
 
-  // タグ入力のキーボード操作
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // 変換中（IME使用中）はイベントを無視する
     if (e.nativeEvent.isComposing) return;
-
-    // Enterの判定でタグを追加
     if (e.key === 'Enter') {
-      e.preventDefault(); // フォーム送信を防ぐ
-
+      e.preventDefault();
       const newTag = tagInput.trim();
-      // バリデーションチェック
-      if (newTag.length > MAX_TAG_LENGTH) {
-        return; // 長すぎるタグは追加しない
-      }
-      if (tagList.length >= MAX_TAG_COUNT) {
-        return; // タグ数上限
-      }
-      // 重複チェックと空文字チェック
+      if (newTag.length > MAX_TAG_LENGTH || tagList.length >= MAX_TAG_COUNT) return;
       if (newTag && !tagList.includes(newTag)) {
         const newTags = [...tagList, newTag];
         setTagList(newTags);
-        setPost({ ...post, tags: newTags.join(',') });
-        setTagInput("");
+        setTags(newTags.join(','));
+        setTagInput('');
       }
     }
   };
+
   const handleTagBlur = () => {
     const newTag = tagInput.trim();
     if (newTag && !tagList.includes(newTag)) {
       const newTags = [...tagList, newTag];
       setTagList(newTags);
-      setPost({ ...post, tags: newTags.join(',') });
-      setTagInput("");
+      setTags(newTags.join(','));
+      setTagInput('');
     }
   };
 
-  // タグの削除機能
   const removeTag = (tagToRemove: string) => {
-    const newTags = tagList.filter(tag => tag !== tagToRemove);
+    const newTags = tagList.filter((t) => t !== tagToRemove);
     setTagList(newTags);
-    setPost({ ...post, tags: newTags.join(',') });
+    setTags(newTags.join(','));
   };
 
+  // newFileをinputに反映
   useEffect(() => {
-    if (post.file) {
-      // inputタグを探す
-      const fileInput = document.getElementById('image-upload') as HTMLInputElement;
-
+    if (newFile) {
+      const fileInput = document.getElementById('image-upload-edit') as HTMLInputElement;
       if (fileInput) {
-        // DataTransferを使ってファイルをセット可能な形式にする
         const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(post.file);
-
-        // 3. inputタグにファイルを復元！
+        dataTransfer.items.add(newFile);
         fileInput.files = dataTransfer.files;
       }
     }
-  }, [post.file, formState]); // ファイルが変わった時や、エラーが出た時(formState)に実行
+  }, [newFile, formState]);
 
   return (
     <>
@@ -281,14 +223,11 @@ export function ComposeScreen() {
         {/* モバイル用ヘッダー */}
         <div className="px-6 pt-12 pb-6 lg:hidden">
           <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">COMPOSE — 書く</h1>
-            </div>
+            <h1 className="text-[13px] tracking-[0.15em] uppercase text-[#9B9890]">EDIT — 編集</h1>
             <div className="flex items-center gap-2 text-[#A8A89E]">
-              {/* 天気アイコン */}
               {(() => {
-                const iconName = getWeatherIconName(weather?.weatherId ?? null);
-                const iconProps = { className: "w-4 h-4", strokeWidth: 1.5 };
+                const iconName = getWeatherIconName(weatherId);
+                const iconProps = { className: 'w-4 h-4', strokeWidth: 1.5 };
                 const icons: Record<WeatherIconName, React.ReactNode> = {
                   Sun: <Sun {...iconProps} />,
                   Cloud: <Cloud {...iconProps} />,
@@ -300,46 +239,47 @@ export function ComposeScreen() {
                 };
                 return icons[iconName];
               })()}
-              <span className="text-[13px] tracking-wide">{weather?.temp}°C</span>
+              <span className="text-[13px] tracking-wide">{temperature}°C</span>
             </div>
           </div>
         </div>
 
-        {/* 画像アップロード */}
-        <div className="flex-1 px-6 pb-4 lg:w-3/5 lg:px-16 lg:py-16 lg:pb-16 lg:flex lg:flex-col lg:justify-center">
-          {/* デスクトップヘッダー */}
+        {/* 左パネル：画像 */}
+        <div className="px-6 pb-4 lg:flex-1 lg:w-3/5 lg:px-16 lg:py-16 lg:flex lg:flex-col lg:justify-center">
           <div className="hidden lg:block mb-12">
-            <h1 className="text-[13px] tracking-[0.2em] uppercase text-[#9B9890] mb-8">COMPOSE — 書く</h1>
-            {!post.locationAvailable && (
-              <div className="text-[11px] text-[#9B9890] tracking-wide bg-gradient-to-r from-[#E8E6E0] to-transparent py-2 px-3 rounded-sm inline-block">
-                どこか
-              </div>
-            )}
+            <h1 className="text-[13px] tracking-[0.2em] uppercase text-[#9B9890]">EDIT — 編集</h1>
           </div>
 
           <label
             ref={imageRef}
-            htmlFor="image-upload"
+            htmlFor="image-upload-edit"
             className="block w-full aspect-[16/10] bg-[#F5F4F0] border border-[#D4CFC3]/20 rounded-sm cursor-pointer transition-all hover:bg-[#E8E6E0]/30 hover:border-[#D4CFC3]/40 relative overflow-hidden lg:shadow-sm"
           >
-            {post.image ? (
+            {previewImage ? (
               <Image
-                src={post.image}
-                alt="Uploaded memory"
+                src={previewImage}
+                alt="投稿画像"
                 fill
-                className="object-cover" // 画面幅に応じた最適化（モバイルはフル幅、デスクトップは最大幅を考慮）
+                className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 1200px"
-                priority // 投稿画面のメインビジュアルなので優先的に読み込み
               />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 lg:gap-6">
-                <ImagePlus className="w-10 h-10 lg:w-16 lg:h-16 text-[#D4CFC3] transition-transform hover:scale-110" strokeWidth={1.5} />
-                <span className="text-[13px] lg:text-[16px] text-[#9B9890] tracking-wider">風景を追加</span>
+                <ImagePlus className="w-10 h-10 lg:w-16 lg:h-16 text-[#D4CFC3]" strokeWidth={1.5} />
+                <span className="text-[13px] lg:text-[16px] text-[#9B9890] tracking-wider">画像を変更</span>
+              </div>
+            )}
+            {/* 画像変更オーバーレイ */}
+            {previewImage && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/20 transition-colors">
+                <span className="opacity-0 hover:opacity-100 text-white text-[13px] tracking-wider transition-opacity">
+                  画像を変更
+                </span>
               </div>
             )}
           </label>
           <input
-            id="image-upload"
+            id="image-upload-edit"
             type="file"
             accept="image/*"
             onChange={handleFileSelect}
@@ -348,11 +288,10 @@ export function ComposeScreen() {
           />
 
           {/* デスクトップ時の天気表示 */}
-          <div className="hidden lg:flex items-center gap-3 text-[#7A7A70] mt-6">
-            {/* 天気アイコン */}
+          <div className="hidden lg:flex items-center gap-3 mt-6 text-[#7A7A70]">
             {(() => {
-              const iconName = getWeatherIconName(weather?.weatherId ?? null);
-              const iconProps = { className: "w-5 h-5", strokeWidth: 1.5 };
+              const iconName = getWeatherIconName(weatherId);
+              const iconProps = { className: 'w-5 h-5', strokeWidth: 1.5 };
               const icons: Record<WeatherIconName, React.ReactNode> = {
                 Sun: <Sun {...iconProps} />,
                 Cloud: <Cloud {...iconProps} />,
@@ -364,14 +303,14 @@ export function ComposeScreen() {
               };
               return icons[iconName];
             })()}
-            <span className="text-[15px] font-medium tracking-wide">{weather?.temp}°C</span>
+            <span className="text-[15px] font-medium tracking-wide">{temperature}°C</span>
           </div>
         </div>
 
-        {/* モバイル分割 */}
+        {/* モバイル分割線 */}
         <div className="h-px bg-[#D4CFC3]/10 mx-6 lg:hidden" />
 
-        {/* テキストエリア */}
+        {/* 右パネル：フォーム */}
         <div
           ref={rightPanelRef}
           className="flex-1 px-6 pt-6 pb-28 flex flex-col gap-6 lg:w-2/5 lg:px-16 lg:py-16 lg:gap-8 lg:bg-[#F9F8F5] lg:justify-end"
@@ -379,16 +318,15 @@ export function ComposeScreen() {
         >
           <div className="flex-1 lg:flex-initial lg:space-y-4">
             <textarea
-              value={post.text}
-              onChange={(e) => setPost({ ...post, text: e.target.value })}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
               placeholder="今考えていることを書き留めましょう..."
               className={`w-full h-32 lg:h-20 bg-transparent border-none outline-none resize-none text-[15px] lg:text-[17px] leading-[1.8] lg:leading-[2] text-[#3D3D3A] placeholder:text-[#9B9890] tracking-wide ${validationWarnings.text ? 'text-red-800/80' : ''}`}
               style={{ fontWeight: 400 }}
               name="text"
             />
-            {/* テキストバリデーション警告 */}
             {validationWarnings.text && (
-              <div className="flex items-center gap-1.5 text-red-500 text-[11px] lg:text-[12px] mt-1 animate-fadeIn">
+              <div className="flex items-center gap-1.5 text-red-500 text-[11px] lg:text-[12px] mt-1">
                 <AlertCircle className="w-3.5 h-3.5" strokeWidth={2} />
                 <span>{validationWarnings.text}</span>
               </div>
@@ -400,25 +338,22 @@ export function ComposeScreen() {
                 タグ
               </label>
               <div className="flex flex-wrap items-center gap-2 w-full border-[#D4CFC3]/20 py-2 min-h-[40px]">
-                {/* 実際の入力欄 */}
                 <input
                   type="text"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagKeyDown}
                   onBlur={handleTagBlur}
-                  placeholder={tagList.length === 0 ? "夕暮れ, 公園, ひまわり..." : ""}
+                  placeholder={tagList.length === 0 ? '春, 食べ物, 晴れ...' : ''}
                   className="w-full bg-transparent border-b border-[#D4CFC3]/20 py-2 lg:py-3 text-[14px] lg:text-[16px] text-[#3D3D3A] placeholder:text-[#9B9890]/60 outline-none focus:border-[#D4CFC3]/40 transition-colors tracking-wide"
                   style={{ fontWeight: 400 }}
-                // name="tags"
                 />
-                {/* 確定したタグの表示 */}
                 {tagList.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => removeTag(tag)}
-                    className="group px-3.5 py-1.5 lg:px-4 lg:py-2 bg-[#E8E6E0]/80 hover:bg-[#D4CFC3]/60 text-[#3D3D3A] text-[12px] lg:text-[14px] tracking-wide rounded-full transition-all hover:shadow-sm flex items-center gap-1.5 animate-fadeIn"
+                    className="group px-3.5 py-1.5 lg:px-4 lg:py-2 bg-[#E8E6E0]/80 hover:bg-[#D4CFC3]/60 text-[#3D3D3A] text-[12px] lg:text-[14px] tracking-wide rounded-full transition-all flex items-center gap-1.5"
                     style={{ fontWeight: 400 }}
                   >
                     <span>#{tag}</span>
@@ -426,28 +361,25 @@ export function ComposeScreen() {
                   </button>
                 ))}
               </div>
-              {/* タグバリデーション警告 */}
               {(validationWarnings.tags || validationWarnings.tagInput) && (
-                <div className="flex items-center gap-1.5 text-red-500 text-[11px] lg:text-[12px] mt-1 animate-fadeIn">
+                <div className="flex items-center gap-1.5 text-red-500 text-[11px] lg:text-[12px] mt-1">
                   <AlertCircle className="w-3.5 h-3.5" strokeWidth={2} />
                   <span>{validationWarnings.tagInput || validationWarnings.tags}</span>
                 </div>
               )}
-              {/* サーバー送信用の隠しフィールド */}
-              <input type="hidden" name="tags" value={post.tags} />
-
+              <input type="hidden" name="tags" value={tags} />
             </div>
           </div>
 
-          {/* 公開設定 */}
+          {/* 公開設定 + 更新ボタン */}
           <div className="flex items-center justify-between pt-4 lg:pt-12 lg:border-t lg:border-[#D4CFC3]/10">
             <button
               type="button"
-              onClick={() => setPost({ ...post, isPublic: !post.isPublic })}
+              onClick={() => setIsPublic(!isPublic)}
               className="flex items-center gap-3 text-[13px] lg:text-[15px] text-[#A8A89E] tracking-wide transition-colors hover:text-[#3D3D3A]"
               style={{ fontWeight: 400 }}
             >
-              {post.isPublic ? (
+              {isPublic ? (
                 <>
                   <Globe className="w-4 h-4 lg:w-5 lg:h-5" strokeWidth={1.5} />
                   <span>公開</span>
@@ -459,28 +391,21 @@ export function ComposeScreen() {
                 </>
               )}
             </button>
-            <input type="hidden" name="isPublic" value={post.isPublic ? 'true' : 'false'} />
-            <input type="hidden" name="locationAvailable" value={String(post.locationAvailable)} />
-            <input type="hidden" name="latitude" value={location?.lat ?? ""} />
-            <input type="hidden" name="longitude" value={location?.lng ?? ""} />
-            <input type="hidden" name="temp" value={weather?.temp ?? 0} />
-            <input type="hidden" name="weather" value={weather?.description ?? "天気不明"} />
-            <input type="hidden" name="weatherId" value={weather?.weatherId ?? 0} />
+            <input type="hidden" name="postId" value={postId} />
+            <input type="hidden" name="isPublic" value={isPublic ? 'true' : 'false'} />
+            <input type="hidden" name="existingImageUrl" value={initialImageUrl} />
             <SubmitButton />
-
           </div>
         </div>
       </form>
 
-      {/* エラートースト（formの外に配置してfixedが正しく動作するように） */}
+      {/* エラートースト */}
       <div
-        className={`fixed bottom-28 left-4 right-4 z-[100] bg-red-50/95 backdrop-blur-md border border-red-100 px-4 py-3 rounded-lg shadow-lg lg:bottom-10 lg:left-auto lg:right-10 lg:w-auto lg:min-w-[300px] transition-all duration-300 ${formState.error && showError
-          ? 'opacity-100 translate-y-0'
-          : 'opacity-0 translate-y-2 pointer-events-none'
-          }`}
+        className={`fixed bottom-28 left-4 right-4 z-[100] bg-red-50/95 backdrop-blur-md border border-red-100 px-4 py-3 rounded-lg shadow-lg lg:bottom-10 lg:left-auto lg:right-10 lg:w-auto lg:min-w-[300px] transition-all duration-300 ${
+          formState.error && showError ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
+        }`}
       >
         <div className="flex items-center justify-center gap-2">
-          {/* 警告アイコン */}
           <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
@@ -489,34 +414,31 @@ export function ComposeScreen() {
           </p>
         </div>
       </div>
-      {/* トリミング用モーダル */}
+
+      {/* トリミングモーダル */}
       <Dialog open={isCropOpen} onOpenChange={setIsCropOpen}>
         <DialogContent className="max-w-[90vw] w-[500px] h-[80vh] flex flex-col p-0 gap-0 overflow-hidden bg-[#FAFAF8]">
           <DialogHeader className="p-4 bg-[#FAFAF8] z-10">
             <DialogTitle className="text-[#3D3D3A]">調整</DialogTitle>
           </DialogHeader>
-
-          {/* Cropperエリア (相対配置で広げる) */}
           <div className="relative flex-1 w-full bg-[#E8E6E0]">
             {tempImgSrc && (
               <Cropper
                 image={tempImgSrc}
                 crop={crop}
                 zoom={zoom}
-                aspect={16 / 10} // ★仕様アドバイス: アプリのアスペクト比に合わせる
+                aspect={16 / 10}
                 onCropChange={setCrop}
                 onCropComplete={onCropComplete}
                 onZoomChange={setZoom}
-                showGrid={true} // お好みで
-                restrictPosition={true}
+                showGrid
+                restrictPosition
                 objectFit="contain"
                 minZoom={0.8}
                 zoomSpeed={1}
               />
             )}
           </div>
-
-          {/* コントロールエリア */}
           <div className="p-6 bg-[#FAFAF8] flex flex-col gap-6">
             <div className="flex items-center gap-4">
               <span className="text-xs text-[#9B9890]">Zoom</span>
@@ -530,14 +452,14 @@ export function ComposeScreen() {
             <DialogFooter className="flex-row gap-2 sm:gap-2">
               <button
                 onClick={() => setIsCropOpen(false)}
-                className="flex-1 py-2.5 border border-[#D4CFC3] text-[#9B9890] text-[13px] lg:text-[15px] tracking-[0.08em] rounded-sm transition-all hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50"
+                className="flex-1 py-2.5 border border-[#D4CFC3] text-[#9B9890] text-[13px] tracking-[0.08em] rounded-sm transition-all hover:text-[#3D3D3A] hover:bg-[#E8E6E0]/50"
                 style={{ fontWeight: 400 }}
               >
                 キャンセル
               </button>
               <button
                 onClick={handleCropConfirm}
-                className="flex-1 py-2.5 bg-[#D4CFC3] text-[#3D3D3A] text-[13px] lg:text-[15px] tracking-[0.08em] rounded-sm transition-all hover:opacity-80 hover:shadow-md"
+                className="flex-1 py-2.5 bg-[#D4CFC3] text-[#3D3D3A] text-[13px] tracking-[0.08em] rounded-sm transition-all hover:opacity-80 hover:shadow-md"
                 style={{ fontWeight: 400 }}
               >
                 完了
@@ -547,5 +469,5 @@ export function ComposeScreen() {
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
