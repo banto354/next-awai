@@ -8,12 +8,13 @@ import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 // プロパティの型定義
 interface BookmarkCardProps {
   entry: BookmarkEntry;
+  onTagClick?: (tag: string) => void;
 }
 
-export function BookmarkCard({ entry }: BookmarkCardProps) {
+export function BookmarkCard({ entry, onTagClick }: BookmarkCardProps) {
   return (
     <Link
-      href={`/entry/${entry.id}`}
+      href={`/entry/${entry.id}?from=bookmarks`}
       key={entry.id}
       className="px-6 py-6 transition-all hover:bg-[#E8E6E0]/30 cursor-pointer lg:px-8 lg:py-8 lg:rounded-sm lg:border lg:border-transparent lg:hover:border-[#D4CFC3]/20 lg:hover:shadow-md group"
       style={{
@@ -83,19 +84,9 @@ export function BookmarkCard({ entry }: BookmarkCardProps) {
           </div>
 
           {/* Tags */}
-          {entry.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-3 lg:gap-2">
-              {entry.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="text-[10px] lg:text-[12px] text-[#A8A89E] tracking-wider"
-                  style={{ fontWeight: 400 }}
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="mt-2 lg:mt-0">
+            <TagList tags={entry.tags} onTagClick={onTagClick} />
+          </div>
           {/* 作成ユーザー情報 */}
           {entry.user && (
             <div className="flex items-center gap-2 mt-4 lg:mt-5 pt-3 lg:pt-4 border-t border-[#E8E6E0]/50">

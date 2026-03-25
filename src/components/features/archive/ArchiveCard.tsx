@@ -13,7 +13,7 @@ interface ArchiveCardProps {
 
 export function ArchiveCard({ entry, onTagClick }: ArchiveCardProps) {
   return (
-    <Link href={`/entry/${entry.id}`} className="block group">
+    <Link href={`/entry/${entry.id}?from=archive`} className="block group">
       <div
         className="px-6 py-6 transition-all hover:bg-[#E8E6E0]/30 cursor-pointer lg:px-8 lg:py-8 lg:rounded-sm lg:border lg:border-transparent lg:hover:border-[#D4CFC3]/20 lg:hover:shadow-md group"
         style={{

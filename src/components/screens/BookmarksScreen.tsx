@@ -4,16 +4,19 @@ import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
 import { Bookmark } from 'lucide-react';
 import { BookmarkEntry } from '@/types/entry';
 import { BookmarkCard } from '@/components/features/bookmarks/BookmarkCard';
+import { TagFilter } from '@/components/features/archive/TagFilter';
 import { getBookmarkedPostsAction } from '@/app/bookmarks/loadMoreAction';
 
 interface BookmarksScreenProps {
   bookmarkedEntries: BookmarkEntry[];
   initialOffset: number;
   initialHasMore: boolean;
+  initialTag?: string;
 }
 
-export function BookmarksScreen({ bookmarkedEntries, initialOffset, initialHasMore }: BookmarksScreenProps) {
+export function BookmarksScreen({ bookmarkedEntries, initialOffset, initialHasMore, initialTag }: BookmarksScreenProps) {
   const [entries, setEntries] = useState<BookmarkEntry[]>(bookmarkedEntries);
+  const [selectedTag, setSelectedTag] = useState<string | null>(initialTag ?? null);
   const [offset, setOffset] = useState<number>(initialOffset);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isPending, startTransition] = useTransition();
@@ -31,6 +34,18 @@ export function BookmarksScreen({ bookmarkedEntries, initialOffset, initialHasMo
       setHasMore(result.hasMore);
     });
   }, [offset, hasMore, isPending]);
+
+  const filteredEntries = selectedTag
+    ? entries.filter((entry) => entry.tags.includes(selectedTag))
+    : entries;
+
+  const handleTagClick = (tag: string) => {
+    setSelectedTag(tag);
+  };
+
+  const clearTagFilter = () => {
+    setSelectedTag(null);
+  };
 
   // Intersection Observer
   useEffect(() => {
@@ -63,6 +78,26 @@ export function BookmarksScreen({ bookmarkedEntries, initialOffset, initialHasMo
         </div>
       </div>
 
+      {/* タグフィルター */}
+      <div className="px-6 pb-8 lg:px-16 lg:pb-12">
+        <TagFilter
+          active={selectedTag !== null}
+          tag={selectedTag || ''}
+          onClick={clearTagFilter}
+        />
+      </div>
+
+      {/* フィルター適用中で該当なしメッセージ */}
+      {selectedTag !== null && filteredEntries.length === 0 && (
+        <div className="px-6 pb-8 lg:px-16 lg:pb-12">
+          <div className="lg:max-w-7xl lg:mx-auto">
+            <p className="text-[11px] text-[#9B9890] tracking-wide animate-in fade-in duration-500">
+              この条件に重なる投稿はありません
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* コンテンツ */}
       {entries.length === 0 && !isPending ? (
         /* データがない場合 */
@@ -81,8 +116,8 @@ export function BookmarksScreen({ bookmarkedEntries, initialOffset, initialHasMo
         /* グリッドレイアウト */
         <div className="px-6 space-y-1 lg:space-y-0 lg:px-16">
           <div className="lg:max-w-7xl lg:mx-auto lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-6">
-            {entries.map((entry) => (
-              <BookmarkCard key={entry.id} entry={entry} />
+            {filteredEntries.map((entry) => (
+              <BookmarkCard key={entry.id} entry={entry} onTagClick={handleTagClick} />
             ))}
           </div>
         </div>
@@ -99,9 +134,9 @@ export function BookmarksScreen({ bookmarkedEntries, initialOffset, initialHasMo
             <div className="text-[10px] lg:text-[12px] text-[#D4CFC3] tracking-[0.2em] uppercase">
               スクロールで追加読み込み
             </div>
-          ) : entries.length > 0 ? (
+          ) : filteredEntries.length > 0 ? (
             <div className="text-[10px] lg:text-[12px] text-[#9B9890] tracking-[0.2em] uppercase">
-              {entries.length} 件の投稿
+              {filteredEntries.length} 件の投稿
             </div>
           ) : null}
         </div>

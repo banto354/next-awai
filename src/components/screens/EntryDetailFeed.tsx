@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { Bookmark, ChevronLeft, Trash2, Pencil, Sun, Cloud, CloudRain, CloudDrizzle, CloudLightning, CloudFog, CloudSun, Snowflake } from 'lucide-react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Entry } from '@/types/entry';
 import { getWeatherIconName, WeatherIconName } from '@/lib/weatherUtils';
 import {
@@ -27,7 +27,14 @@ interface EntryDetailFeedProps {
 
 export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const from = searchParams.get('from');
   const [isPending, startTransition] = useTransition();
+
+  const handleTagClick = (tag: string) => {
+    const dest = from === 'bookmarks' ? '/bookmarks' : '/archive';
+    router.push(`${dest}?tag=${encodeURIComponent(tag)}`);
+  };
 
   // UI上のブックマーク状態管理
   const [isBookmarked, setIsBookmarked] = useState(entry.isBookmarked);
@@ -202,13 +209,14 @@ export function EntryDetailFeed({ entry, isAuthor }: EntryDetailFeedProps) {
           {entry.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 lg:gap-3 mt-4 lg:mt-6 lg:px-4">
               {entry.tags.map((tag, index) => (
-                <span
+                <button
                   key={index}
-                  className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[13px] tracking-wider rounded-full transition-colors hover:bg-[#D4CFC3]/30"
+                  onClick={() => handleTagClick(tag)}
+                  className="px-3 py-1 lg:px-4 lg:py-1.5 bg-[#E8E6E0] text-[#A8A89E] text-[11px] lg:text-[13px] tracking-wider rounded-full transition-colors hover:bg-[#D4CFC3]/50 hover:text-[#3D3D3A]"
                   style={{ fontWeight: 400 }}
                 >
                   #{tag}
-                </span>
+                </button>
               ))}
             </div>
           )}

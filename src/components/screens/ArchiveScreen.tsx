@@ -13,16 +13,17 @@ interface ArchiveScreenProps {
   initialEntries: ArchiveEntry[];
   initialCursor: string | null;
   initialHasMore: boolean;
+  initialTag?: string;
 }
 
-export function ArchiveScreen({ initialEntries, initialCursor, initialHasMore }: ArchiveScreenProps) {
+export function ArchiveScreen({ initialEntries, initialCursor, initialHasMore, initialTag }: ArchiveScreenProps) {
   const [entries, setEntries] = useState<ArchiveEntry[]>(initialEntries);
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isPending, startTransition] = useTransition();
 
   const [tempFilterActive, setTempFilterActive] = useState(false);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(initialTag ?? null);
   const { weather, loading: weatherLoading } = useLocationWeather();
   const currentTemp = weather?.temp ?? null;
 

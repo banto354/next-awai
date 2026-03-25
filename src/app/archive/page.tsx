@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { ArchiveScreen } from "@/components/screens/ArchiveScreen";
 import { auth } from "@clerk/nextjs/server";
-import { ArchiveEntry } from "../types/entry";
+import { ArchiveEntry } from "@/types/entry";
 import { getWeatherLabel } from "@/lib/weatherUtils";
 import { formatDateJapanese } from "@/lib/dateUtils";
 
 const INITIAL_LIMIT = 12;
 
-export default async function ArchivePage() {
+export default async function ArchivePage({ searchParams }: { searchParams: Promise<{ tag?: string }> }) {
+  const { tag: initialTag } = await searchParams;
     // 認証はmiddlewareで処理済み。userIdはDB検索に使用
     const { userId } = await auth();
 
@@ -56,5 +57,5 @@ export default async function ArchivePage() {
         isBookmarked: post.bookmarkedBy.length > 0,
     }));
 
-    return <ArchiveScreen initialEntries={formattedEntries} initialCursor={nextCursor} initialHasMore={hasMore} />;
+    return <ArchiveScreen initialEntries={formattedEntries} initialCursor={nextCursor} initialHasMore={hasMore} initialTag={initialTag} />;
 }
